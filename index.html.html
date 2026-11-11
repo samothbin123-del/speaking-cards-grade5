@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Speaking Cards - ល្បែងសិក្សាភាសាខ្មែរ ថ្នាក់ទី៥</title>
+    <!-- Google Fonts: Battambang & Kantumruy Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700;900&family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4338ca;
+            --primary-light: #6366f1;
+            --primary-dark: #312e81;
+            --accent-gold: #f59e0b;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+            --bg-canvas: #0f172a;
+            --sidebar-bg: rgba(15, 23, 42, 0.94);
+            --card-front-bg: #ffffff;
+            --card-back-grad: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%);
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --border-glass: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Battambang', 'Kantumruy Pro', sans-serif;
+            background-color: var(--bg-canvas);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Ambient background glow */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            background: radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.18) 0%, transparent 40%),
+                        radial-gradient(circle at 85% 80%, rgba(245, 158, 11, 0.12) 0%, transparent 45%);
+        }
+
+        canvas#particleCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        canvas#confettiCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        /* Main Layout Grid */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            width: 100vw;
+            min-height: 100vh;
+        }
+
+        /* LEFT DASHBOARD SIDEBAR */
+        .dashboard-sidebar {
+            width: 320px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 24px 20px;
+            box-shadow: 10px 0 35px rgba(0, 0, 0, 0.4);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 30;
+            overflow-y: auto;
+        }
+
+        .dashboard-sidebar.collapsed {
+            margin-left: -320px;
+        }
+
+        /* Brand & Logo */
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .app-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f59e0b, #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .brand-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* Control Sections */
+        .control-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Custom Dropdowns & Selects */
+        .select-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #f8fafc;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .select-input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Level Filter Tabs */
+        .filter-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            background: #0f172a;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 4px;
+            color: #94a3b8;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(67, 56, 202, 0.4);
+        }
+
+        /* Timer Section */
+        .timer-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .timer-btn {
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 7px 4px;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-family: inherit;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timer-btn.active {
+            background: #f59e0b;
+            color: #0f172a;
+            font-weight: 700;
+            border-color: #f59e0b;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+
+        .timer-display {
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: #f59e0b;
+            letter-spacing: 2px;
+            margin-top: 4px;
+        }
+
+        /* Progress Bar */
+        .progress-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .progress-track {
+            height: 10px;
+            background: #0f172a;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #06b6d4);
+            border-radius: 10px;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        /* Control Action Buttons in Sidebar */
+        .sidebar-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #f8fafc;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-light);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Floating Sidebar Toggle Button */
+        .sidebar-toggle-pill {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 40;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-glass);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+        }
+
+        .sidebar-toggle-pill:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Presentation Stage (Right/Center) */
+        .stage-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 3D Card Scene (Strict WebKit & iPad Safari Compatibility) */
+        .card-scene {
+            width: 100%;
+            max-width: 580px;
+            height: 480px;
+            perspective: 1400px;
+            -webkit-perspective: 1400px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card-flipper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            transition: transform 0.65s cubic-bezier(0.34, 1.2, 0.64, 1);
+            border-radius: 28px;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), 0 0 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .card-scene.is-flipped .card-flipper {
+            -webkit-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden !important;
+            backface-visibility: hidden !important;
+            -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+            border-radius: 28px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 32px 28px;
+        }
+
+        /* Card Back (Closed / Face-down state) */
+        .card-back {
+            background: var(--card-back-grad);
+            border: 3px solid rgba(245, 158, 11, 0.6);
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            -webkit-transform: rotateY(0deg);
+            transform: rotateY(0deg);
+            z-index: 2;
+        }
+
+        .card-back::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            pointer-events: none;
+        }
+
+        /* Cartoon Students & Central Question Badge on Card Back */
+        .card-back-students-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            user-select: none;
+        }
+
+        .student-svg {
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.45));
+            transition: transform 0.3s;
+        }
+
+        .student-boy {
+            animation: floatStudentBoy 3s infinite ease-in-out;
+        }
+
+        .student-girl {
+            animation: floatStudentGirl 3s infinite ease-in-out 1.5s;
+        }
+
+        @keyframes floatStudentBoy {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1.5deg); }
+        }
+
+        @keyframes floatStudentGirl {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(-1.5deg); }
+        }
+
+        .card-back-center-badge {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-back-q-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #f59e0b 0%, #b45309 75%, #78350f 100%);
+            border: 3px solid #fef08a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+            animation: pulseBadge 2.2s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseBadge {
+            from { transform: scale(0.96); box-shadow: 0 0 18px rgba(245, 158, 11, 0.5); }
+            to { transform: scale(1.08); box-shadow: 0 0 32px rgba(245, 158, 11, 0.95); }
+        }
+
+        .q-mark {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 3px 8px rgba(0, 0, 0, 0.55);
+            line-height: 1;
+            font-family: 'Battambang', sans-serif;
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 1.25rem;
+            animation: twinkle 2s infinite ease-in-out;
+            user-select: none;
+        }
+        .sparkle.s1 { top: -14px; left: -10px; animation-delay: 0.2s; }
+        .sparkle.s2 { bottom: -12px; right: -8px; animation-delay: 1.1s; }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.35; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+
+        .card-back-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #fef3c7;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+
+        .card-back-tap-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.16);
+            padding: 8px 22px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            animation: bounceSoft 2s infinite ease-in-out;
+            transition: all 0.2s;
+        }
+
+        .card-back-tap-hint:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        /* Card Front (Revealed Word) */
+        .card-front {
+            background: var(--card-front-bg);
+            color: var(--text-dark);
+            -webkit-transform: rotateY(180deg);
+            transform: rotateY(180deg);
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            z-index: 1;
+        }
+
+        /* Card Header inside Front */
+        .card-front-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .badge-level {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .level-easy { background: #dcfce7; color: #15803d; }
+        .level-medium { background: #fef3c7; color: #b45309; }
+        .level-hard { background: #fee2e2; color: #b91c1c; }
+
+        .btn-sound-play {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #ede9fe;
+            color: var(--primary);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-sound-play:hover {
+            background: var(--primary);
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .btn-sound-play.speaking {
+            animation: pulseWave 0.6s infinite alternate;
+            background: #ec4899;
+            color: #ffffff;
+        }
+
+        /* Main Word Display: Solid vivid color to prevent circumfix vowel clipping */
+        .card-word-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: auto 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .card-word {
+            font-family: 'Battambang', cursive, sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.45;
+            padding: 10px 0;
+            color: #1e1b4b;
+            text-shadow: 0 4px 12px rgba(30, 27, 75, 0.15);
+            letter-spacing: normal;
+            word-break: break-word;
+        }
+
+        .card-phonetic {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #6366f1;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-pos {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        /* Card Definition & Example */
+        .card-front-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 16px;
+            width: 100%;
+        }
+
+        .card-definition {
+            font-size: 1.05rem;
+            color: #334155;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .card-example {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-style: italic;
+            text-align: center;
+            background: #f8fafc;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-light);
+        }
+
+        /* Navigation Controls below Stage */
+        .stage-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 28px;
+            z-index: 20;
+        }
+
+        .btn-nav {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-glass);
+            color: #f8fafc;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-nav:hover {
+            background: var(--primary);
+            border-color: var(--primary-light);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-nav:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Floating Action Button (FAB) for fast NEXT */
+        .fab-next-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            cursor: pointer;
+            z-index: 50;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5), 0 0 0 4px rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .fab-next-btn:hover {
+            transform: scale(1.12) rotate(5deg);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.7), 0 0 0 6px rgba(255, 255, 255, 0.3);
+        }
+
+        .fab-next-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Key shortcut hint */
+        .hotkeys-hint {
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #64748b;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 4px 14px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+        }
+
+        /* Completion Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 2px solid var(--accent-gold);
+            border-radius: 24px;
+            padding: 36px 32px;
+            text-align: center;
+            max-width: 440px;
+            width: 90%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-trophy {
+            font-size: 4rem;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fef08a;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            font-size: 1rem;
+            color: #cbd5e1;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Toast notification */
+        .toast-msg {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(16, 185, 129, 0.95);
+            color: #ffffff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            z-index: 110;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        .toast-msg.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Animations */
+        @keyframes pulseGlow {
+            from { transform: scale(0.95); opacity: 0.7; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+
+        @keyframes bounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes pulseWave {
+            from { transform: scale(1); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
+            to { transform: scale(1.15); box-shadow: 0 0 0 12px rgba(236, 72, 153, 0); }
+        }
+
+        /* Responsive Media Queries */
+        @media (max-width: 900px) {
+            .dashboard-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 35;
+                box-shadow: 15px 0 40px rgba(0,0,0,0.7);
+            }
+            .dashboard-sidebar.collapsed {
+                transform: translateX(-100%);
+                margin-left: 0;
+            }
+            .card-scene {
+                max-width: 90vw;
+                height: 440px;
+            }
+            .card-word {
+                font-size: 3.2rem;
+            }
+            .fab-next-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 64px;
+                height: 64px;
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-scene {
+                height: 400px;
+            }
+            .card-word {
+                font-size: 2.6rem;
+            }
+            .card-phonetic {
+                font-size: 1.1rem;
+            }
+            .stage-controls {
+                gap: 8px;
+            }
+            .btn-nav {
+                padding: 10px 18px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+    <canvas id="particleCanvas"></canvas>
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- Sidebar Toggle Pill -->
+    <button class="sidebar-toggle-pill" id="sidebarToggleBtn" onclick="toggleSidebar()">
+        <span id="sidebarToggleIcon">☰</span>
+        <span id="sidebarToggleText">ផ្ទាំងបញ្ជា</span>
+    </button>
+
+    <!-- Toast Notification -->
+    <div class="toast-msg" id="toastMsg">សារជូនដំណឹង!</div>
+
+    <div class="app-container">
+        <!-- LEFT DASHBOARD SIDEBAR -->
+        <aside class="dashboard-sidebar" id="dashboardSidebar">
+            <div class="sidebar-brand">
+                <div class="app-logo">📖</div>
+                <div>
+                    <div class="brand-title">Speaking Cards</div>
+                    <div class="brand-subtitle">ភាសាខ្មែរ ថ្នាក់ទី៥ • កម្មវិធីជាតិ</div>
+                </div>
+            </div>
+
+            <!-- Week & Day Selector -->
+            <div class="control-section">
+                <div class="section-label">
+                    <span>📅 ជ្រើសរើសសប្តាហ៍ & ថ្ងៃ</span>
+                    <span id="badgeCurrentWeek" style="color: var(--accent-gold); font-size: 0.78rem;">សប្តាហ៍ទី១</span>
+                </div>
+                <select class="select-input" id="weekSelect" onchange="onWeekChange()">
+                    <!-- Populated dynamically via JS -->
+                </select>
+                <select class="select-input" id="daySelect" onchange="onDayChange()">
+                    <!-- Populated dynamically via JS -->
+                </select>
+            </div>
+
+            <!-- Difficulty Filter -->
+            <div class="control-section">
+                <div class="section-label">🎯 កម្រិតលំបាកនៃពាក្យ</div>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-level="all" onclick="setDifficultyFilter('all')">ទាំងអស់</button>
+                    <button class="tab-btn" data-level="easy" onclick="setDifficultyFilter('easy')">ងាយ</button>
+                    <button class="tab-btn" data-level="medium" onclick="setDifficultyFilter('medium')">មធ្យម</button>
+                    <button class="tab-btn" data-level="hard" onclick="setDifficultyFilter('hard')">ពិបាក</button>
+                </div>
+            </div>
+
+            <!-- Auto-Timer Section -->
+            <div class="control-section">
+                <div class="section-label">
+                    <span>⏱️ កំណត់ម៉ោងប្តូរកាត</span>
+                    <span id="timerStatusLabel" style="font-size: 0.78rem; color:#94a3b8;">បិទ</span>
+                </div>
+                <div class="timer-options">
+                    <button class="timer-btn active" data-sec="0" onclick="setTimerSec(0)">បិទ</button>
+                    <button class="timer-btn" data-sec="10" onclick="setTimerSec(10)">១០ វិ.</button>
+                    <button class="timer-btn" data-sec="20" onclick="setTimerSec(20)">២០ វិ.</button>
+                    <button class="timer-btn" data-sec="30" onclick="setTimerSec(30)">៣០ វិ.</button>
+                </div>
+                <div class="timer-display" id="timerDisplay">--:--</div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="control-section progress-box">
+                <div class="section-label">
+                    <span>📊 វឌ្ឍនភាពសិក្សា</span>
+                    <span id="progressPercent" style="color: var(--accent-emerald); font-weight: 700;">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+                <div class="progress-meta">
+                    <span id="progressCountText">កាតទី ១ នៃ ៤៨</span>
+                    <span id="learnedCountText">បានរៀន៖ ០</span>
+                </div>
+            </div>
+
+            <!-- Sidebar Action Buttons -->
+            <div class="sidebar-actions">
+                <button class="btn-action btn-secondary" onclick="shuffleDeck()" title="ច្របល់កាត">
+                    🔀 ច្របល់
+                </button>
+                <button class="btn-action btn-secondary" onclick="restartDeck()" title="ចាប់ផ្តើមឡើងវិញ">
+                    🔄 សារដើម
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN STAGE / CARD PRESENTATION -->
+        <main class="stage-area" id="stageArea">
+            <!-- 3D Interactive Card Scene -->
+            <div class="card-scene" id="cardScene" onclick="toggleCardFlip()">
+                <div class="card-flipper" id="cardFlipper">
+                    <!-- BACK OF CARD (Closed by default) -->
+                    <div class="card-face card-back" id="cardBackFace">
+                        <!-- Cartoon Students & Question Badge -->
+                        <div class="card-back-students-wrapper">
+                            <!-- Boy Student SVG -->
+                            <svg class="student-svg student-boy" viewBox="0 0 100 130" width="85" height="110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Legs/Shorts -->
+                                <rect x="36" y="90" width="12" height="28" rx="5" fill="#1e3a8a"/>
+                                <rect x="52" y="90" width="12" height="28" rx="5" fill="#1e3a8a"/>
+                                <!-- Shoes -->
+                                <rect x="33" y="114" width="16" height="10" rx="5" fill="#0f172a"/>
+                                <rect x="51" y="114" width="16" height="10" rx="5" fill="#0f172a"/>
+                                <!-- Shirt -->
+                                <path d="M30 52 L70 52 L68 92 L32 92 Z" fill="#ffffff"/>
+                                <!-- Tie -->
+                                <polygon points="47,58 53,58 52,78 50,82 48,78" fill="#1e3a8a"/>
+                                <!-- Collar -->
+                                <polygon points="38,52 50,60 44,52" fill="#e2e8f0"/>
+                                <polygon points="62,52 50,60 56,52" fill="#e2e8f0"/>
+                                <!-- Right arm (waving) -->
+                                <path d="M68 56 C78 50, 88 40, 86 32 C84 28, 78 32, 74 42" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
+                                <circle cx="87" cy="30" r="5" fill="#fed7aa"/>
+                                <!-- Left arm -->
+                                <path d="M32 56 C24 65, 22 75, 26 84" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
+                                <!-- Head / Neck -->
+                                <rect x="44" y="44" width="12" height="10" rx="4" fill="#fed7aa"/>
+                                <!-- Face -->
+                                <circle cx="50" cy="32" r="18" fill="#fed7aa"/>
+                                <!-- Cheeks -->
+                                <circle cx="40" cy="36" r="3" fill="#f43f5e" opacity="0.5"/>
+                                <circle cx="60" cy="36" r="3" fill="#f43f5e" opacity="0.5"/>
+                                <!-- Eyes -->
+                                <circle cx="43" cy="30" r="2.2" fill="#0f172a"/>
+                                <circle cx="57" cy="30" r="2.2" fill="#0f172a"/>
+                                <circle cx="44" cy="29" r="0.8" fill="#ffffff"/>
+                                <circle cx="58" cy="29" r="0.8" fill="#ffffff"/>
+                                <!-- Smile -->
+                                <path d="M46 36 Q50 41 54 36" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                                <!-- Hair -->
+                                <path d="M32 26 C33 14, 42 10, 50 10 C60 10, 68 15, 68 26 C64 22, 58 20, 50 20 C42 20, 36 23, 32 26 Z" fill="#1e1b4b"/>
+                                <path d="M32 25 C31 30, 32 35, 34 38 C33 32, 33 28, 34 25 Z" fill="#1e1b4b"/>
+                                <path d="M68 25 C69 30, 68 35, 66 38 C67 32, 67 28, 66 25 Z" fill="#1e1b4b"/>
+                            </svg>
+
+                            <!-- Center Question Mark Ornament -->
+                            <div class="card-back-center-badge">
+                                <div class="sparkle s1">✨</div>
+                                <div class="card-back-q-circle">
+                                    <span class="q-mark">?</span>
+                                </div>
+                                <div class="sparkle s2">⭐</div>
+                            </div>
+
+                            <!-- Girl Student SVG -->
+                            <svg class="student-svg student-girl" viewBox="0 0 100 130" width="85" height="110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Legs -->
+                                <rect x="38" y="96" width="10" height="22" rx="4" fill="#fed7aa"/>
+                                <rect x="52" y="96" width="10" height="22" rx="4" fill="#fed7aa"/>
+                                <!-- Shoes with white socks -->
+                                <rect x="36" y="112" width="13" height="7" rx="3" fill="#ffffff"/>
+                                <rect x="51" y="112" width="13" height="7" rx="3" fill="#ffffff"/>
+                                <rect x="35" y="117" width="15" height="7" rx="3" fill="#0f172a"/>
+                                <rect x="50" y="117" width="15" height="7" rx="3" fill="#0f172a"/>
+                                <!-- Pleated Navy Skirt -->
+                                <polygon points="32,74 68,74 74,96 26,96" fill="#1e3a8a"/>
+                                <line x1="42" y1="74" x2="40" y2="96" stroke="#172554" stroke-width="1.5"/>
+                                <line x1="50" y1="74" x2="50" y2="96" stroke="#172554" stroke-width="1.5"/>
+                                <line x1="58" y1="74" x2="60" y2="96" stroke="#172554" stroke-width="1.5"/>
+                                <!-- Shirt -->
+                                <path d="M32 52 L68 52 L68 75 L32 75 Z" fill="#ffffff"/>
+                                <!-- Red Bow Ribbon -->
+                                <polygon points="46,56 42,53 42,60" fill="#ef4444"/>
+                                <polygon points="54,56 58,53 58,60" fill="#ef4444"/>
+                                <circle cx="50" cy="56" r="2.5" fill="#dc2626"/>
+                                <!-- Collar -->
+                                <polygon points="36,52 48,58 44,52" fill="#e2e8f0"/>
+                                <polygon points="64,52 52,58 56,52" fill="#e2e8f0"/>
+                                <!-- Book in hands -->
+                                <rect x="38" y="68" width="24" height="18" rx="2" fill="#10b981"/>
+                                <rect x="40" y="70" width="20" height="14" rx="1" fill="#ecfdf5"/>
+                                <line x1="50" y1="68" x2="50" y2="86" stroke="#059669" stroke-width="1.5"/>
+                                <!-- Hands holding book -->
+                                <circle cx="37" cy="76" r="4" fill="#fed7aa"/>
+                                <circle cx="63" cy="76" r="4" fill="#fed7aa"/>
+                                <!-- Arms -->
+                                <path d="M33 54 C28 62, 32 72, 37 76" stroke="#fed7aa" stroke-width="6" stroke-linecap="round"/>
+                                <path d="M67 54 C72 62, 68 72, 63 76" stroke="#fed7aa" stroke-width="6" stroke-linecap="round"/>
+                                <!-- Head / Neck -->
+                                <rect x="44" y="44" width="12" height="10" rx="4" fill="#fed7aa"/>
+                                <!-- Hair back / Pigtails -->
+                                <ellipse cx="28" cy="38" rx="7" ry="14" fill="#1e1b4b"/>
+                                <ellipse cx="72" cy="38" rx="7" ry="14" fill="#1e1b4b"/>
+                                <circle cx="31" cy="30" r="3.5" fill="#ef4444"/>
+                                <circle cx="69" cy="30" r="3.5" fill="#ef4444"/>
+                                <!-- Face -->
+                                <circle cx="50" cy="32" r="18" fill="#fed7aa"/>
+                                <!-- Cheeks -->
+                                <circle cx="40" cy="36" r="3" fill="#f43f5e" opacity="0.5"/>
+                                <circle cx="60" cy="36" r="3" fill="#f43f5e" opacity="0.5"/>
+                                <!-- Eyes -->
+                                <circle cx="43" cy="30" r="2.2" fill="#0f172a"/>
+                                <circle cx="57" cy="30" r="2.2" fill="#0f172a"/>
+                                <circle cx="44" cy="29" r="0.8" fill="#ffffff"/>
+                                <circle cx="58" cy="29" r="0.8" fill="#ffffff"/>
+                                <!-- Smile -->
+                                <path d="M46 36 Q50 41 54 36" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+                                <!-- Hair Front / Bangs -->
+                                <path d="M32 25 C33 13, 44 9, 50 9 C58 9, 68 14, 68 25 C64 21, 57 18, 50 18 C43 18, 36 21, 32 25 Z" fill="#1e1b4b"/>
+                                <path d="M34 23 C40 27, 46 27, 50 24 C54 27, 60 27, 66 23 C64 19, 58 17, 50 17 C42 17, 36 19, 34 23 Z" fill="#1e1b4b"/>
+                            </svg>
+                        </div>
+
+                        <!-- Motivational Invitation Text -->
+                        <div class="card-back-title" id="cardBackTitle">តោះ! ចុចបើកអានពាក្យទាំងអស់គ្នា</div>
+                        <div class="card-back-tap-hint">
+                            <span>👆 ចុចត្រឡប់កាត (Tap to Flip)</span>
+                        </div>
+                    </div>
+
+                    <!-- FRONT OF CARD (Revealed content) -->
+                    <div class="card-face card-front" id="cardFrontFace" style="display: none; visibility: hidden;">
+                        <div class="card-front-header">
+                            <span class="badge-level level-easy" id="cardLevelBadge">ងាយ</span>
+                            <button class="btn-sound-play" id="btnSoundPlay" onclick="event.stopPropagation(); playCurrentWordAudio();" title="ស្តាប់សំឡេងអាន">
+                                🔊
+                            </button>
+                        </div>
+
+                        <div class="card-word-wrap">
+                            <div class="card-word" id="cardWordText">សាលារៀន</div>
+                            <div class="card-phonetic" id="cardPhoneticText">[សា-លា-រៀន]</div>
+                            <div class="card-pos" id="cardPosText">នាម (ន.)</div>
+                        </div>
+
+                        <div class="card-front-footer">
+                            <div class="card-definition" id="cardDefText">កន្លែងសម្រាប់ផ្តល់ការអប់រំ និងបង្រៀនចំណេះដឹងដល់សិស្សានុសិស្ស។</div>
+                            <div class="card-example" id="cardExampleText">«យើងទាំងអស់គ្នាត្រូវស្រឡាញ់ និងថែរក្សាសាលារៀនឱ្យបានស្អាត»</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage Navigation Buttons -->
+            <div class="stage-controls">
+                <button class="btn-nav" onclick="prevCard()" title="កាតមុន (Arrow Left)">
+                    ⬅️ ថយក្រោយ
+                </button>
+                <button class="btn-nav" onclick="toggleCardFlip()" title="ត្រឡប់កាត (Space)">
+                    🔄 បើក / បិទកាត
+                </button>
+                <button class="btn-nav" onclick="nextCard()" title="កាតបន្ទាប់ (Arrow Right)">
+                    បន្ទាប់ ➡️
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Action Button (FAB) for fast NEXT -->
+    <button class="fab-next-btn" id="fabNextBtn" onclick="nextCard()" title="កាតបន្ទាប់ (Next Card)">
+        ➔
+    </button>
+
+    <!-- Keyboard shortcuts hint -->
+    <div class="hotkeys-hint">
+        Space: បើកកាត | ➔ / ⬅️: ប្តូរកាត | S: ច្របល់ | A/P: ស្តាប់សំឡេង | F: ពេញអេក្រង់
+    </div>
+
+    <!-- Completion Modal -->
+    <div class="modal-overlay" id="completionModal">
+        <div class="modal-card">
+            <div class="modal-trophy">🏆🎉</div>
+            <div class="modal-title">អបអរសាទរ! ពូកែណាស់!</div>
+            <div class="modal-desc">ប្អូនបានរៀន និងអនុវត្តពាក្យទាំងអស់ក្នុងមេរៀននេះចប់សព្វគ្រប់ហើយ! តើប្អូនចង់រៀនម្តងទៀត ឬប្តូរទៅមេរៀនបន្ទាប់?</div>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn-action btn-secondary" onclick="closeModal(); restartDeck();">🔄 រៀនឡើងវិញ</button>
+                <button class="btn-action btn-primary" onclick="goToNextDay();">➡️ ថ្ងៃបន្ទាប់</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Persistent HTML5 Audio for iOS / iPad Safari Khmer TTS -->
+    <audio id="khmerAudioPlayer" preload="auto" playsinline></audio>
+
+    <!-- COMPLETE EMBEDDED JAVASCRIPT & DATA -->
+    <script>
+        /* =====================================================================
+           1. 36 ACADEMIC WEEKS CONFIGURATION (Grade 5 Khmer)
+           ===================================================================== */
+        const ACADEMIC_WEEKS_DATA = [
+            { week: 1, title: "មេរៀនទី១៖ វីរជនឆ្នើម (អ្នកតាឃ្លាំងមឿង, សម្តេច ជួន ណាត)", days: [1, 2, 3, 4, 5, 6] },
+            { week: 2, title: "មេរៀនទី១៖ វីរជនឆ្នើម (ទឹកចិត្តស្នេហាជាតិ និងពលីកម្ម)", days: [7, 8, 9, 10, 11, 12] },
+            { week: 3, title: "មេរៀនទី១៖ វីរជនឆ្នើម (កេរ្តិ៍ឈ្មោះ និងគំរូវីរភាព)", days: [13, 14, 15, 16, 17, 18] },
+            { week: 4, title: "មេរៀនទី២៖ សម្បត្តិអក្សរសិល្ប៍ (រឿងសុភាទន្សាយ, កវីនិពន្ធ)", days: [19, 20, 21, 22, 23, 24] },
+            { week: 5, title: "មេរៀនទី២៖ សម្បត្តិអក្សរសិល្ប៍ (សាស្ត្រាស្លឹករឹត និងតួអង្គ)", days: [25, 26, 27, 28, 29, 30] },
+            { week: 6, title: "មេរៀនទី២៖ សម្បត្តិអក្សរសិល្ប៍ (គតិបណ្ឌិត និងសុភាសិត)", days: [31, 32, 33, 34, 35, 36] },
+            { week: 7, title: "មេរៀនទី៣៖ កំណាព្យខ្មែរ (បទពាក្យប្រាំពីរ, ចំណាប់ជួន)", days: [37, 38, 39, 40, 41, 42] },
+            { week: 8, title: "មេរៀនទី៣៖ កំណាព្យខ្មែរ (រង្វាស់កាព្យ និងចង្វាក់)", days: [43, 44, 45, 46, 47, 48] },
+            { week: 9, title: "មេរៀនទី៣៖ កំណាព្យខ្មែរ (អត្ថន័យ និងការសូត្រកាព្យ)", days: [49, 50, 51, 52, 53, 54] },
+            { week: 10, title: "មេរៀនទី៤៖ ប្រយោជន៍នៃសារព័ត៌មាន (កាសែត, វិទ្យុ, ទូរទស្សន៍)", days: [55, 56, 57, 58, 59, 60] },
+            { week: 11, title: "មេរៀនទី៤៖ ប្រយោជន៍នៃសារព័ត៌មាន (ទស្សនាវដ្តី និងការផ្សព្វផ្សាយ)", days: [61, 62, 63, 64, 65, 66] },
+            { week: 12, title: "មេរៀនទី៤៖ ប្រយោជន៍នៃសារព័ត៌មាន (សេរីភាព និងក្រមសីលធម៌)", days: [67, 68, 69, 70, 71, 72] },
+            { week: 13, title: "មេរៀនទី៥៖ ស្មារតីទទួលខុសត្រូវ (ទំនួលខុសត្រូវ និងកាតព្វកិច្ច)", days: [73, 74, 75, 76, 77, 78] },
+            { week: 14, title: "មេរៀនទី៥៖ ស្មារតីទទួលខុសត្រូវ (វិន័យ, សីលធម៌ និងការសហការ)", days: [79, 80, 81, 82, 83, 84] },
+            { week: 15, title: "មេរៀនទី៥៖ ស្មារតីទទួលខុសត្រូវ (ភាពស្មោះត្រង់ និងគំរូល្អ)", days: [85, 86, 87, 88, 89, 90] },
+            { week: 16, title: "មេរៀនទី៦៖ អតីតកាលរបស់យើង (ប្រវត្តិសាស្ត្រ និងសម័យអង្គរ)", days: [91, 92, 93, 94, 95, 96] },
+            { week: 17, title: "មេរៀនទី៦៖ អតីតកាលរបស់យើង (ប្រាសាទបុរាណ និងសិលាចារឹក)", days: [97, 98, 99, 100, 101, 102] },
+            { week: 18, title: "មេរៀនទី៦៖ អតីតកាលរបស់យើង (បេតិកភណ្ឌ និងមរតកដូនតា)", days: [103, 104, 105, 106, 107, 108] },
+            { week: 19, title: "មេរៀនទី៧៖ ទូរគមនាគមន៍នៅកម្ពុជា (ប្រព័ន្ធទូរស័ព្ទ និងអ៊ីនធឺណិត)", days: [109, 110, 111, 112, 113, 114] },
+            { week: 20, title: "មេរៀនទី៧៖ ទូរគមនាគមន៍នៅកម្ពុជា (ផ្កាយរណប និងការទំនាក់ទំនង)", days: [115, 116, 117, 118, 119, 120] },
+            { week: 21, title: "មេរៀនទី៧៖ ទូរគមនាគមន៍នៅកម្ពុជា (បច្ចេកវិទ្យាឌីជីថល)", days: [121, 122, 123, 124, 125, 126] },
+            { week: 22, title: "មេរៀនទី៨៖ ផលិតផលខ្មែរ (កសិផល, សិប្បកម្ម និងត្បាញ)", days: [127, 128, 129, 130, 131, 132] },
+            { week: 23, title: "មេរៀនទី៨៖ ផលិតផលខ្មែរ (ត្បូងខ្មែរ និងឧស្សាហកម្មកែច្នៃ)", days: [133, 134, 135, 136, 137, 138] },
+            { week: 24, title: "មេរៀនទី៨៖ ផលិតផលខ្មែរ (ការគាំទ្រផលិតផលក្នុងស្រុក)", days: [139, 140, 141, 142, 143, 144] },
+            { week: 25, title: "មេរៀនទី៩៖ ពេលវេលាជាមាសប្រាក់ (តម្លៃពេលវេលា និងកាលវិភាគ)", days: [145, 146, 147, 148, 149, 150] },
+            { week: 26, title: "មេរៀនទី៩៖ ពេលវេលាជាមាសប្រាក់ (ការសន្សំសំចៃ និងផែនការជីវិត)", days: [151, 152, 153, 154, 155, 156] },
+            { week: 27, title: "មេរៀនទី៩៖ ពេលវេលាជាមាសប្រាក់ (ភាពទៀងទាត់ និងការគោរពពេល)", days: [157, 158, 159, 160, 161, 162] },
+            { week: 28, title: "មេរៀនទី១០៖ ប្រយោជន៍នៃវិទ្យាសាស្ត្រ (របកគំហើញ និងបច្ចេកវិទ្យា)", days: [163, 164, 165, 166, 167, 168] },
+            { week: 29, title: "មេរៀនទី១០៖ ប្រយោជន៍នៃវិទ្យាសាស្ត្រ (ឧបករណ៍ជំនួយ និងការស្រាវជ្រាវ)", days: [169, 170, 171, 172, 173, 174] },
+            { week: 30, title: "មេរៀនទី១០៖ ប្រយោជន៍នៃវិទ្យាសាស្ត្រ (នវានុវត្តន៍ និងការអភិវឌ្ឍ)", days: [175, 176, 177, 178, 179, 180] },
+            { week: 31, title: "មេរៀនទី១១៖ ការការពារបរិស្ថាន និងធនធានធម្មជាតិ (ព្រៃឈើ និងសត្វព្រៃ)", days: [181, 182, 183, 184, 185, 186] },
+            { week: 32, title: "មេរៀនទី១១៖ ការការពារបរិស្ថាន និងធនធានធម្មជាតិ (ទឹក ដី និងការកែច្នៃសំរាម)", days: [187, 188, 189, 190, 191, 192] },
+            { week: 33, title: "មេរៀនទី១១៖ ការការពារបរិស្ថាន និងធនធានធម្មជាតិ (ការប្រែប្រួលអាកាសធាតុ)", days: [193, 194, 195, 196, 197, 198] },
+            { week: 34, title: "មេរៀនទី១២៖ សន្តិភាព និងការអភិវឌ្ឍជាតិ (សាមគ្គីភាព និងសន្តិភាព)", days: [199, 200, 201, 202, 203, 204] },
+            { week: 35, title: "មេរៀនទី១២៖ សន្តិភាព និងការអភិវឌ្ឍជាតិ (ពលរដ្ឋល្អ និងការអភិវឌ្ឍប្រកបដោយចីរភាព)", days: [205, 206, 207, 208, 209, 210] },
+            { week: 36, title: "មេរៀនទី១២៖ សន្តិភាព និងការអភិវឌ្ឍជាតិ (រំលឹក និងត្រៀមប្រឡងប្រចាំឆ្នាំ)", days: [211, 212, 213, 214, 215, 216] }
+        ];
+
+        /* =====================================================================
+           2. RICH VOCABULARY DATABASE (Week 1: Days 1 to 6 - 288 Unique Words)
+           100% Chuon Nath Khmer Phonetics & Authentic Definitions
+           ===================================================================== */
+        const VOCABULARY_DATA = {
+            "day_1": [
+                // ងាយ (១៦ ពាក្យ)
+                { word: "ដំណើរ", phonetic: "[ដំ-ណើ]", pos: "នាម", level: "easy", def: "ការដើរ ការធ្វើដំណើរទៅកាន់ទីណាមួយ។", example: "គ្រូបង្រៀនធ្វើដំណើរទៅសាលារៀនជារៀងរាល់ព្រឹក។" },
+                { word: "ផ្ទះ", phonetic: "[ផ្ទះ]", pos: "នាម", level: "easy", def: "ទីលំនៅសម្រាប់មនុស្សរស់នៅ។", example: "ផ្ទះរបស់ខ្ញុំមានសួនផ្កាដ៏ស្រស់ស្អាតនៅខាងមុខ។" },
+                { word: "ភ្លៀង", phonetic: "[ភ្លៀង]", pos: "នាម", level: "easy", def: "តំណក់ទឹកដែលធ្លាក់ចុះពីលើមេឃ។", example: "មេឃកំពុងភ្លៀងធ្លាក់ស្រោចស្រពស្រែចម្ការ។" },
+                { word: "ដើម", phonetic: "[ដើម]", pos: "នាម", level: "easy", def: "រុក្ខជាតិមានដើម មានមែក មានស្លឹក។", example: "ដើមឈើផ្ដល់ម្លប់ត្រជាក់ដល់មនុស្សនិងសត្វ។" },
+                { word: "ស្ទឹង", phonetic: "[ស្ទឹង]", pos: "នាម", level: "easy", def: "ផ្លូវទឹកធម្មជាតិតូចជាងទន្លេ។", example: "ទឹកស្ទឹងហូរកាត់ភូមិរបស់ខ្ញុំថ្លាយង់។" },
+                { word: "ពោត", phonetic: "[ពោត]", pos: "នាម", level: "easy", def: "ដំណាំធញ្ញជាតិមានផ្លែមានគ្រាប់ផ្អែមឆ្ងាញ់។", example: "ពូសៅដាំពោតនៅមាត់ទន្លេបានផលច្រើន។" },
+                { word: "ស្ករ", phonetic: "[ស្ក]", pos: "នាម", level: "easy", def: "ជាតិផ្អែមធ្វើពីទឹកត្នោត ឬអំពៅ។", example: "ស្ករត្នោតខ្មែរមានក្លិនឈ្ងុយនិងផ្អែមឆ្ងាញ់។" },
+                { word: "ជើង", phonetic: "[ជើង]", pos: "នាម", level: "easy", def: "អវយវៈសម្រាប់ឈរ និងដើរ។", example: "យើងត្រូវលាងជើងឱ្យស្អាតមុនពេលឡើងលើផ្ទះ។" },
+                { word: "ដៃ", phonetic: "[ដៃ]", pos: "នាម", level: "easy", def: "អវយវៈសម្រាប់ចាប់កាន់ និងធ្វើការងារ។", example: "សិស្សលើកដៃស្ដាំសុំការអនុញ្ញាតពីលោកគ្រូ។" },
+                { word: "ភ្នែក", phonetic: "[ភ្នែក]", pos: "នាម", level: "easy", def: "អវយវៈសម្រាប់មើលឃើញអ្វីៗគ្រប់យ៉ាង។", example: "ភ្នែកជាអវយវៈសំខាន់បំផុតសម្រាប់មើលឃើញ។" },
+                { word: "ត្រចៀក", phonetic: "[ត្រ-ចៀក]", pos: "នាម", level: "easy", def: "អវយវៈសម្រាប់ស្តាប់ឮសូរផ្សេងៗ។", example: "យើងប្រើត្រចៀកទាំងសងខាងដើម្បីស្ដាប់មេរៀន។" },
+                { word: "ចិត្ត", phonetic: "[ចិត]", pos: "នាម", level: "easy", def: "ដួងចិត្ត គំនិត ស្មារតីរបស់មនុស្ស។", example: "សិស្សល្អត្រូវមានចិត្តសប្បុរសចំពោះមិត្តភក្តិ។" },
+                { word: "ស្រែ", phonetic: "[ស្រែ]", pos: "នាម", level: "easy", def: "ដីសម្រាប់ដាំដុះស្រូវ។", example: "កសិករកំពុងភ្ជួរស្រែដេញតាមរដូវវស្សា។" },
+                { word: "ភូមិ", phonetic: "[ភូម]", pos: "នាម", level: "easy", def: "ទីប្រជុំជនដែលមានផ្ទះអ្នកស្រុករស់នៅជុំគ្នា។", example: "ភូមិខ្ញុំមានសន្តិសុខល្អនិងមានអនាម័យស្អាតបាត។" },
+                { word: "សាលា", phonetic: "[សា-លា]", pos: "នាម", level: "easy", def: "ទីកន្លែងសម្រាប់បណ្តុះបណ្តាលចំណេះវិជ្ជា។", example: "សាលារៀនជាថ្នាលបណ្ដុះបណ្ដាលចំណេះដឹងដល់កុមារ។" },
+                { word: "សៀវភៅ", phonetic: "[សៀវ-ភៅ]", pos: "នាម", level: "easy", def: "ក្រដាសចងក្រងជាក្បាលសម្រាប់អាន និងកត់ត្រា។", example: "ការអានសៀវភៅជួយពង្រីកការគិតនិងចំណេះដឹង។" },
+                // មធ្យម (១៦ ពាក្យ)
+                { word: "វីរជន", phonetic: "[វី-រ៉ាក់-ជន]", pos: "នាម", level: "medium", def: "មនុស្សក្លាហានដែលបានធ្វើអំពើល្អដើម្បីជាតិ។", example: "វីរជនខ្មែរបានពលីជីវិតដើម្បីការពារទឹកដីមាតុភូមិ។" },
+                { word: "យោធិន", phonetic: "[យោ-ធិន]", pos: "នាម", level: "medium", def: "ទាហាន កងទ័ពការពារប្រទេសជាតិ។", example: "យោធិនក្លាហានឈរជើងការពារព្រំដែនយ៉ាងម៉ឺងម៉ាត់។" },
+                { word: "កល្យាណមិត្ត", phonetic: "[កល់-ល្យា-ណៈ-មិត]", pos: "នាម", level: "medium", def: "មិត្តល្អដែលតែងតែជួយដាស់តឿនគ្នាក្នុងផ្លូវល្អ។", example: "កល្យាណមិត្តតែងតែជួយដាស់តឿនគ្នាក្នុងផ្លូវល្អ។" },
+                { word: "ខ្នះខ្នែង", phonetic: "[ខ្នះ-ខ្នែង]", pos: "កិរិយា", level: "medium", def: "ប្រឹងប្រែងធ្វើការងារយ៉ាងសកម្ម។", example: "សិស្សខ្នះខ្នែងរៀនសូត្រដើម្បីទទួលបានចំណេះដឹងពិតប្រាកដ។" },
+                { word: "ភក្តីភាព", phonetic: "[ភាក់-ក្តី-ភាព]", pos: "នាម", level: "medium", def: "សេចក្តីស្មោះស្ម័គ្រ និងភក្តីចំពោះជាតិ។", example: "កងទ័ពមានភក្តីភាពយ៉ាងស្មោះស្ម័គ្រចំពោះជាតិ។" },
+                { word: "ពលីកម្ម", phonetic: "[ពៈ-លី-ក័ម]", pos: "នាម", level: "medium", def: "ការលះបង់ជីវិត ឬកម្លាំងដើម្បីបុព្វហេតុជាតិ។", example: "ពលីកម្មរបស់បុព្វបុរសត្រូវបានកូនចៅចងចាំជានិច្ច។" },
+                { word: "អង់អាច", phonetic: "[អង់-អាច]", pos: "គុណនាម", level: "medium", def: "ក្លាហាន មិនខ្លាចញញើតចំពោះសត្រូវ។", example: "មេទ័ពដឹកនាំទ័ពយ៉ាងអង់អាចក្លាហានចូលសមរភូមិ។" },
+                { word: "វីរភាព", phonetic: "[វី-រ៉ាក់-ភាព]", pos: "នាម", level: "medium", def: "ភាពអង់អាចក្លាហានគួរឱ្យគោរពសរសើរ។", example: "វីរភាពរបស់អ្នកតាឃ្លាំងមឿងត្រូវបានចារទុកក្នុងប្រវត្តិសាស្ត្រ។" },
+                { word: "ស្នេហាជាតិ", phonetic: "[ស្នេ-ហា-ជាតិ]", pos: "នាម", level: "medium", def: "ទឹកចិត្តស្រឡាញ់ និងលះបង់ដើម្បីប្រទេសជាតិ។", example: "ទឹកចិត្តស្នេហាជាតិជំរុញឱ្យយើងរួមគ្នាកសាងប្រទេស។" },
+                { word: "កេរ្តិ៍ឈ្មោះ", phonetic: "[កេរ-ឈ្មោះ]", pos: "នាម", level: "medium", def: "កិត្តិយស និងឈ្មោះល្បីល្បាញក្នុងសង្គម។", example: "វីរបុរសជាតិមានកេរ្តិ៍ឈ្មោះល្បីល្បាញរន្ទឺដល់បច្ចុប្បន្ន។" },
+                { word: "គុណនាម", phonetic: "[គុណ-នាម]", pos: "នាម", level: "medium", def: "ពាក្យសម្រាប់បញ្ជាក់លក្ខណៈរបស់នាម។", example: "គុណនាមជាពាក្យសម្រាប់បញ្ជាក់លក្ខណៈរបស់នាម។" },
+                { word: "ប្រក្រតី", phonetic: "[ប្រាក់-ក្រ-តី]", pos: "គុណនាម", level: "medium", def: "ធម្មតា តាមទម្លាប់ធម្មតា។", example: "គុណនាមប្រក្រតីបញ្ជាក់លក្ខណៈធម្មតានៃនាម។" },
+                { word: "សាមគ្គី", phonetic: "[សា-ម័ក-គី]", pos: "នាម", level: "medium", def: "ការរួបរួមគ្នា មិនបែកបាក់គ្នា។", example: "សាមគ្គីជាកម្លាំងមិនអាចកាត់ថ្លៃបានក្នុងការកសាងជាតិ។" },
+                { word: "សេចក្តីល្អ", phonetic: "[សេច-ក្ដី-ល្អ]", pos: "នាម", level: "medium", def: "អំពើត្រឹមត្រូវតាមធម៌ដែលនាំឱ្យបានក្តីសុខ។", example: "ចូរប្រព្រឹត្តតែអំពើល្អនិងសេចក្ដីស្មោះត្រង់ជានិច្ច។" },
+                { word: "បទពិសោធ", phonetic: "[បត់-ពិ-សោធ]", pos: "នាម", level: "medium", def: "ចំណេះដែលទទួលបានពីការឆ្លងកាត់ការងារជាក់ស្តែង។", example: "លោកយាយមានបទពិសោធច្រើនក្នុងការដាំដំណាំសរីរាង្គ។" },
+                { word: "វិន័យ", phonetic: "[វិ-ណ័យ]", pos: "នាម", level: "medium", def: "ច្បាប់ បទបញ្ជាសម្រាប់រៀបចំសណ្ដាប់ធ្នាប់។", example: "សិស្សពូកែតែងតែគោរពវិន័យសាលាបានខ្ជាប់ខ្ជួន។" },
+                // ពិបាក (១៦ ពាក្យ)
+                { word: "ព្រះរាជាណាចក្រ", phonetic: "[ព្រះ-រា-ជា-ណា-ចក្រ]", pos: "នាម", level: "hard", def: "ប្រទេសដែលមានព្រះមហាក្សត្រជាប្រមុខរដ្ឋ។", example: "ព្រះរាជាណាចក្រកម្ពុជាជាទឹកដីសុវណ្ណភូមិដ៏សម្បូរបែប។" },
+                { word: "សម្តេចព្រះសង្ឃរាជ", phonetic: "[សំ-ដេច-ព្រះ-សង់-ឃាក់-រាច]", pos: "នាម", level: "hard", def: "សម្តេចព្រះសង្ឃរាជ ជួន ណាត បិតាអក្សរសាស្ត្រខ្មែរទំនើប។", example: "សម្តេចព្រះសង្ឃរាជ ជួន ណាត ជាបិតាអក្សរសាស្ត្រខ្មែរទំនើប។" },
+                { word: "វប្បធម៌", phonetic: "[វាប់-ប៉ៈ-ធ័រ]", pos: "នាម", level: "hard", def: "កេរមរតក ទំនៀមទម្លាប់ និងចំណេះដឹងរបស់ជាតិ។", example: "ប្រាសាទអង្គរវត្តជាសម្បត្តិវប្បធម៌ពិភពលោកដ៏ល្បីល្បាញ។" },
+                { word: "សន្តិភាព", phonetic: "[សន់-តិ-ភាព]", pos: "នាម", level: "hard", def: "ភាពស្ងប់ស្ងាត់ គ្មានសង្គ្រាម ឬការកាប់សម្លាប់។", example: "សន្តិភាពនាំមកនូវការអភិវឌ្ឍនិងសេចក្ដីសុខសាន្ត។" },
+                { word: "ដំណោះស្រាយ", phonetic: "[ដំ-ណោះ-ស្រាយ]", pos: "នាម", level: "hard", def: "វិធីដោះស្រាយបញ្ចប់បញ្ហា ឬវិវាទផ្សេងៗ។", example: "យើងត្រូវស្វែងរកដំណោះស្រាយដោយសន្តិវិធីនិងយុត្តិធម៌។" },
+                { word: "ប្រជាធិបតេយ្យ", phonetic: "[ប្រ-ជា-ធិប-ប៉ៈ-តៃ]", pos: "នាម", level: "hard", def: "របបដឹកនាំដែលយកប្រជាពលរដ្ឋជាធំ។", example: "ប្រទេសយើងប្រកាន់យករបបប្រជាធិបតេយ្យសេរីពហុបក្ស។" },
+                { word: "អក្ខរាវិរុទ្ធ", phonetic: "[អាក់-ខៈ-រ៉ា-វិ-រុត]", pos: "នាម", level: "hard", def: "ក្បួនខ្នាតនៃការសរសេរតួអក្សរឱ្យបានត្រឹមត្រូវ។", example: "យើងត្រូវពិនិត្យអក្ខរាវិរុទ្ធឱ្យបានត្រឹមត្រូវមុនសរសេរចប់។" },
+                { word: "ធម្មជាតិ", phonetic: "[ធ័ម-មៈ-ជាតិ]", pos: "នាម", level: "hard", def: "អ្វីៗដែលកើតឡើងឯកឯងក្នុងលោក ដូចជាព្រៃឈើ និងទឹក។", example: "ព្រៃឈើជាធនធានធម្មជាតិដ៏មានតម្លៃមិនអាចខ្វះបាន។" },
+                { word: "អត្ថន័យ", phonetic: "[អ័ត-ថៈ-ន័យ]", pos: "នាម", level: "hard", def: "ន័យខ្លឹមសារបង្កប់ក្នុងពាក្យ ឬអត្ថបទ។", example: "កំណាព្យមួយបទនេះមានអត្ថន័យជ្រាលជ្រៅអប់រំចិត្ត។" },
+                { word: "ប្រតិបត្តិ", phonetic: "[ប្រ-តិ-ប័ត]", pos: "កិរិយា", level: "hard", def: "ធ្វើតាម អនុវត្តតាមច្បាប់ ឬដំបូន្មាន។", example: "កូនល្អត្រូវប្រតិបត្តិតាមដំបូន្មានឪពុកម្តាយជានិច្ច។" },
+                { word: "អភិវឌ្ឍន៍", phonetic: "[អាក់-ភិ-វ័ត]", pos: "កិរិយា", level: "hard", def: "ធ្វើឱ្យចម្រើនលូតលាស់ឡើងជាលំដាប់។", example: "រាជរដ្ឋាភិបាលកំពុងអភិវឌ្ឍន៍ហេដ្ឋារចនាសម្ព័ន្ធជនបទ។" },
+                { word: "ឧបករណ៍", phonetic: "[អ៊ុប-ប៉ាក់-ក]", pos: "នាម", level: "hard", def: "គ្រឿងប្រដាប់សម្រាប់ធ្វើការងារផ្សេងៗ។", example: "កសិករប្រើឧបករណ៍ទំនើបក្នុងការប្រមូលផលកសិកម្ម។" },
+                { word: "ព្រឹទ្ធាចារ្យ", phonetic: "[ព្រឹត-ធា-ចារ]", pos: "នាម", level: "hard", def: "ចាស់ទុំដែលមានចំណេះដឹង និងបទពិសោធច្រើន។", example: "យើងត្រូវគោរពដំបូន្មានរបស់ព្រឹទ្ធាចារ្យក្នុងភូមិ។" },
+                { word: "មនសិការ", phonetic: "[មៈ-នៈ-សិ-កា]", pos: "នាម", level: "hard", def: "ការដឹងខ្លួន ដឹងខុស ដឹងត្រូវក្នុងការងារ។", example: "គ្រូបង្រៀនមានមនសិការវិជ្ជាជីវៈខ្ពស់ក្នុងការបណ្ដុះបណ្ដាលសិស្ស។" },
+                { word: "ប្រាជ្ញា", phonetic: "[ប្រាច់-ញ៉ា]", pos: "នាម", level: "hard", def: "ការយល់ដឹងឈ្លាសវៃ និងគំនិតភ្លឺថ្លា។", example: "ការរៀនសូត្រធ្វើឱ្យមនុស្សមានប្រាជ្ញាភ្លឺថ្លានិងឆ្លាតវៃ។" },
+                { word: "កតញ្ញូ", phonetic: "[កាក់-ត័ញ-ញូ]", pos: "គុណនាម", level: "hard", def: "ដែលចេះដឹងគុណ និងតបគុណអ្នកមានគុណ។", example: "កូនកតញ្ញូតែងដឹងគុណអ្នកមានគុណជានិច្ចគ្រប់ពេលវេលា។" }
+            ],
+            "day_2": [
+                // ងាយ (១៦ ពាក្យ)
+                { word: "បាយ", phonetic: "[បាយ]", pos: "នាម", level: "easy", def: "អាហារចម្អិនពីអង្ករជាចំណីអាហារចម្បង។", example: "កុមារត្រូវបរិភោគបាយឱ្យទៀងពេលដើម្បីសុខភាពល្អ។" },
+                { word: "ត្រី", phonetic: "[ត្រី]", pos: "នាម", level: "easy", def: "សត្វរស់ក្នុងទឹកមានស្រកា និងព្រុយ។", example: "ត្រីរស់នៅក្នុងទឹកបឹងនិងទន្លេយ៉ាងសម្បូរបែប។" },
+                { word: "សត្វ", phonetic: "[សាត់]", pos: "នាម", level: "easy", def: "ភាវៈរស់មានជីវិតអាចកម្រើកបាន។", example: "យើងត្រូវមានមេត្តាធម៌ចំពោះសត្វស្លូតត្រង់។" },
+                { word: "ផ្កា", phonetic: "[ផ្កា]", pos: "នាម", level: "easy", def: "ផ្នែកនៃរុក្ខជាតិដែលរីកមានពណ៌ស្រស់ស្អាត។", example: "ផ្កាម្លិះមានក្លិនក្រអូបឈ្ងុយឈ្ងប់នាពេលព្រឹក។" },
+                { word: "ស្លឹក", phonetic: "[ស្លឹក]", pos: "នាម", level: "easy", def: "ផ្នែកពណ៌បៃតងនៃដើមឈើសម្រាប់ដកដង្ហើម។", example: "ស្លឹកឈើពណ៌បៃតងស្រស់បំភាយខ្យល់បរិសុទ្ធ។" },
+                { word: "ភ្នំ", phonetic: "[ភ្នំ]", pos: "នាម", level: "easy", def: "ដី ឬថ្មដែលដុះខ្ពស់ត្រដែតលើផ្ទៃផែនដី។", example: "ភ្នំដងរែកមានសម្រស់ធម្មជាតិស្រស់បំព្រង។" },
+                { word: "ដី", phonetic: "[ដី]", pos: "នាម", level: "easy", def: "ផ្ទៃរឹងនៃផែនដីសម្រាប់សាងសង់ និងដាំដុះ។", example: "ដីមានជីជាតិល្អជួយឱ្យដំណាំលូតលាស់លឿន។" },
+                { word: "ទឹក", phonetic: "[ទឹក]", pos: "នាម", level: "easy", def: "វត្ថុរាវគ្មានពណ៌ គ្មានក្លិន សំខាន់សម្រាប់ជីវិត។", example: "ទឹកស្អាតមានសារៈសំខាន់បំផុតសម្រាប់ជីវិតរស់នៅ។" },
+                { word: "ខ្យល់", phonetic: "[ខ្យល់]", pos: "នាម", level: "easy", def: "អាកាសដែលបក់រំភើយៗអាចដកដង្ហើមបាន។", example: "ខ្យល់ជំនោរបក់មកត្រជាក់រំភើយៗ។" },
+                { word: "ផ្លូវ", phonetic: "[ផ្លូវ]", pos: "នាម", level: "easy", def: "ច្រកសម្រាប់ធ្វើដំណើរទៅមក។", example: "ផ្លូវថ្នល់ក្នុងភូមិកំពុងត្រូវបានចាក់បេតុងស្អាត។" },
+                { word: "ទូក", phonetic: "[ទូក]", pos: "នាម", level: "easy", def: "យានសម្រាប់ធ្វើដំណើរលើផ្ទៃទឹក។", example: "ទូកងប្រណាំងអុំយ៉ាងលឿនលើផ្ទៃទឹកទន្លេសាប។" },
+                { word: "ស្មៅ", phonetic: "[ស្មៅ]", pos: "នាម", level: "easy", def: "តិណជាតិតូចៗដុះលើដីសម្រាប់សត្វស៊ី។", example: "គោស៊ីស្មៅខ្ចីនៅវាលស្រែយ៉ាងឆ្ងាញ់ពិសា។" },
+                { word: "ក្ដារ", phonetic: "[ក្ដារ]", pos: "នាម", level: "easy", def: "បន្ទះឈើសំប៉ែតរាបស្មើសម្រាប់សរសេរ។", example: "លោកគ្រូសរសេរអក្សរយ៉ាងស្អាតនៅលើក្ដារខៀន។" },
+                { word: "សក់", phonetic: "[សក់]", pos: "នាម", level: "easy", def: "រោមល្អិតៗដុះនៅលើក្បាលមនុស្ស។", example: "សិស្សស្រីចងសក់ឱ្យមានរបៀបរៀបរយល្អ។" },
+                { word: "ចាន", phonetic: "[ចាន]", pos: "នាម", level: "easy", def: "ប្រដាប់សម្រាប់ដាក់បាយ ឬម្ហូបអាហារ។", example: "ប្អូនជួយលាងចាននិងស្លាបព្រាបន្ទាប់ពីហូបបាយរួច។" },
+                { word: "ស្លាប", phonetic: "[ស្លាប]", pos: "នាម", level: "easy", def: "អវយវៈសម្រាប់សត្វបក្សីហើរលើអាកាស។", example: "សត្វស្លាបហើរលំហែលើមេឃយ៉ាងសេរី។" },
+                // មធ្យម (១៦ ពាក្យ)
+                { word: "គ្រួសារ", phonetic: "[គ្រួ-សា]", pos: "នាម", level: "medium", def: "ក្រុមមនុស្សរួមរស់នៅជាមួយគ្នាមានឪពុកម្តាយកូន។", example: "គ្រួសារខ្ញុំរស់នៅជុំគ្នាប្រកបដោយសេចក្ដីសុខ។" },
+                { word: "មិត្តភាព", phonetic: "[មិត-ភៀប]", pos: "នាម", level: "medium", def: "ចំណងទាក់ទងស្រឡាញ់រាប់អានគ្នារវាងមិត្តភក្តិ។", example: "មិត្តភាពស្មោះត្រង់មានតម្លៃធំធេងជាងទ្រព្យសម្បត្តិ។" },
+                { word: "សុជីវធម៌", phonetic: "[សុ-ជី-វ៉ៈ-ធ័រ]", pos: "នាម", level: "medium", def: "ការប្រព្រឹត្តល្អសមរម្យ និងមានសីលធម៌ក្នុងសង្គម។", example: "កុមារត្រូវប្រកាន់ខ្ជាប់នូវសុជីវធម៌ក្នុងការទំនាក់ទំនង។" },
+                { word: "ចរាចរណ៍", phonetic: "[ច-រ៉ា-ច]", pos: "នាម", level: "medium", def: "ការធ្វើដំណើរទៅមកនៃមនុស្ស និងយានយន្តលើផ្លូវ។", example: "យើងត្រូវគោរពច្បាប់ចរាចរណ៍ដើម្បីសុវត្ថិភាពទាំងអស់គ្នា។" },
+                { word: "ព្យាយាម", phonetic: "[ព្យា-យាម]", pos: "កិរិយា", level: "medium", def: "ប្រឹងប្រែងធ្វើកិច្ចការដោយមិនរួញរា។", example: "ភាពជោគជ័យកើតចេញពីការខិតខំប្រឹងប្រែងព្យាយាម។" },
+                { word: "អនាម័យ", phonetic: "[អៈ-ណា-ម៉ី]", pos: "នាម", level: "medium", def: "ការរក្សាភាពស្អាតដើម្បីការពារសុខភាព។", example: "ការហូបស្អាតផឹកស្អាតជួយការពារយើងពីរោគាទាំងពួង។" },
+                { word: "កីឡា", phonetic: "[កី-ឡា]", pos: "នាម", level: "medium", def: "ការហាត់ប្រាណដើម្បីសុខភាព និងកាយសម្បទា។", example: "ការលេងកីឡាជួយឱ្យរាងកាយរឹងមាំនិងមានសុខភាពល្អ។" },
+                { word: "សិល្បៈ", phonetic: "[សិល-ប៉ៈ]", pos: "នាម", level: "medium", def: "វិជ្ជាខាងការបង្កើតអ្វីៗឱ្យល្អប្រណីតទាក់ទាញចិត្ត។", example: "របាំព្រះរាជទ្រព្យជាទម្រង់សិល្បៈបុរាណខ្មែរដ៏ពិសិដ្ឋ។" },
+                { word: "បណ្ណាល័យ", phonetic: "[ប័ណ្ណ-ណា-ល័យ]", pos: "នាម", level: "medium", def: "ទីកន្លែងសម្រាប់តម្កល់សៀវភៅអាន និងស្រាវជ្រាវ។", example: "សិស្សចូលអានសៀវភៅក្នុងបណ្ណាល័យស្ងាត់ស្ងៀម។" },
+                { word: "ចំណេះដឹង", phonetic: "[ចំ-ណេះ-ដឹង]", pos: "នាម", level: "medium", def: "ការយល់ដឹង និងវិជ្ជាដែលទទួលបានពីការរៀន។", example: "ចំណេះដឹងជាទ្រព្យដ៏ប្រសើរដែលចោរលួចមិនបាន។" },
+                { word: "សហគមន៍", phonetic: "[សៈ-ហាក់-គម]", pos: "នាម", level: "medium", def: "ក្រុមមនុស្សដែលរស់នៅជាមួយគ្នាក្នុងតំបន់តែមួយ។", example: "ប្រជាជនក្នុងសហគមន៍បានចូលរួមដាំកូនឈើឡើងវិញ។" },
+                { word: "សុខដុម", phonetic: "[សុខ-ខុ-ដុំ]", pos: "គុណនាម", level: "medium", def: "ដែលចុះសម្រុងគ្នា រស់នៅជាមួយគ្នាដោយសុខសាន្ត។", example: "យើងរស់នៅជាមួយគ្នាក្នុងភាពសុខដុមរមនា។" },
+                { word: "សេដ្ឋកិច្ច", phonetic: "[សេដ-ថាក់-កិច]", pos: "នាម", level: "medium", def: "ការគ្រប់គ្រងទ្រព្យធន និងការរកប្រាក់ចំណូល។", example: "វិស័យទេសចរណ៍ជួយលើកកម្ពស់សេដ្ឋកិច្ចជាតិ។" },
+                { word: "សកម្មភាព", phonetic: "[សាក់-ក័ម-មាក់-ភាព]", pos: "នាម", level: "medium", def: "ការធ្វើសកម្មភាព ឬកាយវិការធ្វើការងារផ្សេងៗ។", example: "សិស្សចូលរួមយ៉ាងសកម្មក្នុងសកម្មភាពអនាម័យសាលា។" },
+                { word: "សេចក្តីក្លាហាន", phonetic: "[សេច-ក្ដី-ក្លា-ហាន]", pos: "នាម", level: "medium", def: "ចិត្តអង់អាច មិនខ្លាចញញើតចំពោះការលំបាក។", example: "ទាហានបង្ហាញសេចក្តីក្លាហានក្នុងការការពារមាតុភូមិ។" },
+                { word: "គំនិតច្នៃប្រឌិត", phonetic: "[គំ-និត-ច្នៃ-ប្រ-ឌិត]", pos: "នាម", level: "medium", def: "ការបង្កើតគំនិតថ្មីៗដែលប្លែក និងមានប្រយោជន៍។", example: "កុមារត្រូវបណ្ដុះគំនិតច្នៃប្រឌិតតាមរយៈការគូររូប។" },
+                // ពិបាក (១៦ ពាក្យ)
+                { word: "អរិយធម៌", phonetic: "[អាក់-រិ-យ៉ាក់-ធ័រ]", pos: "នាម", level: "hard", def: "ការរីកចម្រើនខ្ពង់ខ្ពស់ខាងស្មារតី និងសម្ភាររបស់ជាតិ។", example: "អរិយធម៌អង្គរជាអរិយធម៌រុងរឿងអស្ចារ្យនៅអាស៊ី។" },
+                { word: "បេតិកភណ្ឌ", phonetic: "[បេ-តិ-កាក់-ភ័ន]", pos: "នាម", level: "hard", def: "កេរមរតកដូនតាដែលបន្សល់ទុកសម្រាប់កូនចៅ។", example: "ប្រាសាទព្រះវិហារត្រូវបានចុះជាបេតិកភណ្ឌពិភពលោក។" },
+                { word: "មាតុភូមិ", phonetic: "[មា-តុ-ភូម]", pos: "នាម", level: "hard", def: "ប្រទេសកំណើត ឬទឹកដីកំណើតរបស់ខ្លួន។", example: "យើងគ្រប់រូបមានកាតព្វកិច្ចស្រឡាញ់និងការពារមាតុភូមិ។" },
+                { word: "សច្ចធម៌", phonetic: "[សាច់-ចាក់-ធ័រ]", pos: "នាម", level: "hard", def: "សេចក្តីពិត ធម៌នៃការនិយាយ និងធ្វើតែការពិត។", example: "ការនិយាយការពិតជាការប្រកាន់ខ្ជាប់នូវសច្ចធម៌។" },
+                { word: "ស្មារតី", phonetic: "[ស្មា-រ៉ាក់-តី]", pos: "នាម", level: "hard", def: "ការដឹងខ្លួន ការភ្ញាក់រលឹកក្នុងចិត្តជានិច្ច។", example: "កីឡាករមានស្មារតីតស៊ូប្រកួតរហូតដល់ចប់ម៉ោង។" },
+                { word: "ប្រវត្តិសាស្ត្រ", phonetic: "[ប្រ-វ័ត-តិ-សាស]", pos: "នាម", level: "hard", def: "ក្បួនរៀបរាប់អំពីរឿងរ៉ាវដែលបានកន្លងផុតទៅ។", example: "ការរៀនប្រវត្តិសាស្ត្រជួយឱ្យយើងស្គាល់ពីបុព្វបុរស។" },
+                { word: "កិត្តិយស", phonetic: "[កិត-តិ-យស]", pos: "នាម", level: "hard", def: "កេរ្តិ៍ឈ្មោះល្អដែលគេគោរពកោតក្រែង។", example: "សិស្សពូកែបាននាំមកនូវកិត្តិយសជូនសាលារៀននិងគ្រួសារ។" },
+                { word: "ឯករាជ្យ", phonetic: "[ឯក-កាក់-រាច]", pos: "នាម", level: "hard", def: "ភាពជាម្ចាស់ការលើខ្លួនឯង មិនចំណុះបរទេស។", example: "កម្ពុជាទទួលបានឯករាជ្យពេញលេញនៅថ្ងៃទី៩ វិច្ឆិកា។" },
+                { word: "អធិបតេយ្យ", phonetic: "[អាក់-ធិ-ប៉ាក់-តៃ]", pos: "នាម", level: "hard", def: "អំណាចកំពូលក្នុងការដឹកនាំ និងគ្រប់គ្រងរដ្ឋ។", example: "យើងត្រូវការពារបូរណភាពទឹកដីនិងអធិបតេយ្យជាតិ។" },
+                { word: "សិទ្ធិមនុស្ស", phonetic: "[សិត-ធិ-មនុស]", pos: "នាម", level: "hard", def: "សិទ្ធិសេរីភាពជាមូលដ្ឋានដែលមនុស្សគ្រប់រូបត្រូវទទួលបាន។", example: "ការគោរពសិទ្ធិមនុស្សជាមូលដ្ឋានគ្រឹះនៃសន្តិភាពសង្គម។" },
+                { word: "គរុកោសល្យ", phonetic: "[គុ-រុ-កោ-សល់]", pos: "នាម", level: "hard", def: "វិជ្ជា និងវិធីសាស្ត្រក្នុងការបង្រៀនសិស្ស។", example: "លោកគ្រូបានរៀនវិធីសាស្ត្រគរុកោសល្យថ្មីក្នុងការបង្រៀន។" },
+                { word: "សោភ័ណភាព", phonetic: "[សោ-ភ័ន-ណៈ-ភាព]", pos: "នាម", level: "hard", def: "ភាពស្រស់ស្អាតគួរជាទីគយគន់នៃវត្ថុ ឬទីកន្លែង។", example: "ផ្កាចម្រុះពណ៌ជួយលើកកម្ពស់សោភ័ណភាពទីធ្លាសាលា។" },
+                { word: "បញ្ញវន្ត", phonetic: "[ប័ញ-ញាក់-វ័ន]", pos: "នាម", level: "hard", def: "អ្នកមានប្រាជ្ញាចំណេះដឹងជ្រៅជ្រះក្នុងសង្គម។", example: "បញ្ញវន្តខ្មែរបានចូលរួមចំណែកកសាងប្រទេសជាតិ។" },
+                { word: "សុចរិតភាព", phonetic: "[សុ-ចាក់-រិត-តាក់-ភាព]", pos: "នាម", level: "hard", def: "ភាពទៀងត្រង់ និងស្អាតស្អំក្នុងការបំពេញការងារ។", example: "មន្ត្រីល្អត្រូវមានសុចរិតភាពនិងតម្លាភាពក្នុងការងារ។" },
+                { word: "មនោសញ្ចេតនា", phonetic: "[មៈ-ណោ-ស័ញ-ចេត-តៈ-នា]", pos: "នាម", level: "hard", def: "អារម្មណ៍ស្រឡាញ់ រាប់អាន ឬអាណិតអាសូរក្នុងចិត្ត។", example: "សិស្សមានមនោសញ្ចេតនាយ៉ាងជ្រាលជ្រៅចំពោះលោកគ្រូ។" },
+                { word: "អនុស្សាវរីយ៍", phonetic: "[អាក់-នុស-សា-វ៉ាក់-រ៉ី]", pos: "នាម", level: "hard", def: "ការចងចាំរឿងរ៉ាវល្អៗកាលពីអតីតកាល។", example: "រូបថតចាស់ៗជាអនុស្សាវរីយ៍មិនអាចបំភ្លេចបានក្នុងវ័យកុមារ។" }
+            ],
+            "day_3": [
+                // ងាយ (១៦ ពាក្យ)
+                { word: "ថ្ងៃ", phonetic: "[ថ្ងៃ]", pos: "នាម", level: "easy", def: "ព្រះអាទិត្យ ឬវេលាមានពន្លឺថ្ងៃ។", example: "ថ្ងៃរះបញ្ចេញរស្មីពណ៌មាសលើវាលស្រែដ៏ធំល្វឹងល្វើយ។" },
+                { word: "ខែ", phonetic: "[ខែ]", pos: "នាម", level: "easy", def: "ព្រះចន្ទ ឬកាលកំណត់ ៣០ ថ្ងៃ។", example: "លោកខែពេញបូណ៌មីភ្លឺចិញ្ចែងចិញ្ចាចពេញផ្ទៃមេឃ។" },
+                { word: "ឆ្នាំ", phonetic: "[ឆ្នាំ]", pos: "នាម", level: "easy", def: "កាលកំណត់ ១២ ខែ ឬ ៣៦៥ ថ្ងៃ។", example: "ឆ្នាំថ្មីប្រពៃណីជាតិខ្មែរនាំមកនូវភាពសប្បាយរីករាយ។" },
+                { word: "សេះ", phonetic: "[សេះ]", pos: "នាម", level: "easy", def: "សត្វចតុបាទមានកម្លាំងខ្លាំងរត់លឿន។", example: "សេះរត់យ៉ាងលឿនលើវាលស្មៅដ៏ធំល្វឹងល្វើយ។" },
+                { word: "គោ", phonetic: "[គោ]", pos: "នាម", level: "easy", def: "សត្វស្រុកស៊ីស្មៅជួយទាញរទេះនិងភ្ជួរស្រែ។", example: "កសិករប្រើកម្លាំងគោដើម្បីភ្ជួរដីស្រែ។" },
+                { word: "ក្របី", phonetic: "[ក្រ-បី]", pos: "នាម", level: "easy", def: "សត្វពាហនៈមានស្នែងវែងចូលចិត្តត្រាំភក់។", example: "ក្របីចូលចិត្តត្រាំទឹកត្រជាក់នៅពេលថ្ងៃក្តៅ។" },
+                { word: "ទា", phonetic: "[ទា]", pos: "នាម", level: "easy", def: "បក្សីស្រុកចេះហែលទឹកនិងពងឱ្យមនុស្សបរិភោគ។", example: "កសិករចិញ្ចឹមទាក្នុងស្រែដើម្បីយកពងលក់។" },
+                { word: "មាន់", phonetic: "[មាន់]", pos: "នាម", level: "easy", def: "សត្វស្លាបស្រុករងាវរាល់ព្រឹកដាស់មនុស្ស។", example: "មាន់គកកន្លងរងាវទូងៗដាស់អ្នកភូមិឱ្យក្រោកពីព្រលឹម។" },
+                { word: "កូន", phonetic: "[កូន]", pos: "នាម", level: "easy", def: "អ្នកដែលកើតចេញពីឪពុកម្តាយ។", example: "កូនល្អតែងតែជួយធ្វើកិច្ចការផ្ទះឪពុកម្តាយ។" },
+                { word: "ឪពុក", phonetic: "[អូវ-ពុក]", pos: "នាម", level: "easy", def: "បុរសដែលផ្តល់កំណើតដល់កូន។", example: "ឪពុកជាម្លប់ដ៏កក់ក្តៅរបស់កូនៗក្នុងគ្រួសារ។" },
+                { word: "ម្តាយ", phonetic: "[ម្ដាយ]", pos: "នាម", level: "easy", def: "ស្ត្រីដែលបង្កើតកូននិងចិញ្ចឹមបីបាច់។", example: "ម្តាយមានគុណធំធេងដូចមហាសមុទ្រ។" },
+                { word: "បង", phonetic: "[បង]", pos: "នាម", level: "easy", def: "អ្នកកើតមុនក្នុងគ្រួសារ។", example: "បងប្រុសតែងជួយបង្រៀនមេរៀនដល់ប្អូនៗ។" },
+                { word: "ប្អូន", phonetic: "[ប្អូន]", pos: "នាម", level: "easy", def: "អ្នកកើតក្រោយក្នុងគ្រួសារ។", example: "ប្អូនស្រីខិតខំរៀនសូត្រតាមគំរូល្អរបស់បង។" },
+                { word: "ពូ", phonetic: "[ពូ]", pos: "នាម", level: "easy", def: "ប្អូនប្រុសរបស់ឪពុក ឬម្តាយ។", example: "ពូខ្ញុំជាគ្រូបង្រៀនគំរូប្រចាំស្រុក។" },
+                { word: "មីង", phonetic: "[មីង]", pos: "នាម", level: "easy", def: "ប្អូនស្រីរបស់ឪពុក ឬម្តាយ។", example: "មីងរបស់ខ្ញុំដាំបន្លែសរីរាង្គបានផលល្អ។" },
+                { word: "តា", phonetic: "[តា]", pos: "នាម", level: "easy", def: "ឪពុករបស់ឪពុក ឬម្តាយ។", example: "លោកតាចូលចិត្តនិទានរឿងព្រេងបុរាណឱ្យចៅៗស្តាប់។" },
+                // មធ្យម (១៦ ពាក្យ)
+                { word: "ស្មោះត្រង់", phonetic: "[ស្មោះ-ត្រង់]", pos: "គុណនាម", level: "medium", def: "មិនកុហក មិនបោកប្រាស់ និយាយតែពាក្យពិត។", example: "ភាពស្មោះត្រង់ជាតម្លៃថ្លៃថ្លារបស់មនុស្សគ្រប់រូប។" },
+                { word: "ឧស្សាហ៍", phonetic: "[អ៊ុត-សា]", pos: "គុណនាម", level: "medium", def: "ព្យាយាម មិនខ្ជិលច្រអូសក្នុងការងារ។", example: "សិស្សឧស្សាហ៍តែងតែទទួលបានលទ្ធផលសិក្សាល្អប្រសើរ។" },
+                { word: "ក្លាហាន", phonetic: "[ក្លា-ហាន]", pos: "គុណនាម", level: "medium", def: "មិនភ័យខ្លាច ហ៊ានប្រឈមមុខនឹងការលំបាក។", example: "កុមារក្លាហានហ៊ានទទួលស្គាល់កំហុសរបស់ខ្លួន។" },
+                { word: "ចេះដឹង", phonetic: "[ចេះ-ដឹង]", pos: "គុណនាម", level: "medium", def: "មានវិជ្ជា និងយល់ដឹងច្រើនក្នុងជីវិត។", example: "មនុស្សចេះដឹងតែងតែជួយអភិវឌ្ឍសង្គមជាតិ។" },
+                { word: "គោរព", phonetic: "[គោ-រប់]", pos: "កិរិយា", level: "medium", def: "ឱនលំទោន និងស្តាប់តាមដោយសុជីវធម៌។", example: "សិស្សត្រូវចេះគោរពលោកគ្រូអ្នកគ្រូនិងចាស់ទុំ។" },
+                { word: "ស្រឡាញ់", phonetic: "[ស្រ-ឡាញ់]", pos: "កិរិយា", level: "medium", def: "មានចិត្តអាណិតមេត្តា និងចង់ឱ្យបានសុខ។", example: "យើងត្រូវស្រឡាញ់បងប្អូននិងមិត្តភក្តិទាំងអស់គ្នា។" },
+                { word: "ថែរក្សា", phonetic: "[ថែ-រក-សា]", pos: "កិរិយា", level: "medium", def: "ការពារកុំឱ្យបាត់បង់ ឬខូចខាត។", example: "យើងត្រូវរួមគ្នាថែរក្សាសម្បត្តិវប្បធម៌ជាតិ។" },
+                { word: "កសាង", phonetic: "[ក-សាង]", pos: "កិរិយា", level: "medium", def: "បង្កើតឡើង ឬធ្វើឱ្យមានជារូបរាងឡើង។", example: "រាជរដ្ឋាភិបាលកំពុងកសាងស្ពានថ្មីឆ្លងកាត់ទន្លេ។" },
+                { word: "ការពារ", phonetic: "[កា-ពារ]", pos: "កិរិយា", level: "medium", def: "ទប់ស្កាត់កុំឱ្យមានគ្រោះថ្នាក់កើតឡើង។", example: "កងទ័ពឈរជើងការពារទឹកដីយ៉ាងអង់អាច។" },
+                { word: "ជួយសង្គ្រោះ", phonetic: "[ជួយ-សង់-គ្រោះ]", pos: "កិរិយា", level: "medium", def: "ជួយយកអាសាអ្នកដទៃឱ្យរួចផុតពីទុក្ខភ័យ។", example: "ក្រុមគ្រូពេទ្យបានចុះជួយសង្គ្រោះអ្នកជំងឺទាន់ពេលវេលា។" },
+                { word: "អប់រំ", phonetic: "[អប់-រំ]", pos: "កិរិយា", level: "medium", def: "ទូន្មានប្រៀនប្រដៅឱ្យស្គាល់ខុសត្រូវ។", example: "គ្រួសារជាសាលាដំបូងក្នុងការអប់រំកូនចៅ។" },
+                { word: "បណ្តុះ", phonetic: "[បន់-ដុះ]", pos: "កិរិយា", level: "medium", def: "ធ្វើឱ្យដុះឡើង ឬបង្កើតគំនិតល្អៗ។", example: "សាលារៀនបណ្តុះបណ្តាលសិស្សឱ្យក្លាយជាពលរដ្ឋល្អ។" },
+                { word: "ចែករំលែក", phonetic: "[ចែក-រំ-លែក]", pos: "កិរិយា", level: "medium", def: "ឱ្យទៅអ្នកដទៃនូវអ្វីដែលខ្លួនមាន។", example: "ការចែករំលែកចំណេះដឹងជាអំពើដ៏ល្អប្រពៃ។" },
+                { word: "រួបរួម", phonetic: "[រួប-រួម]", pos: "កិរិយា", level: "medium", def: "ចូលរួមគ្នាជាធ្លុងមួយមិនបែកបាក់។", example: "ប្រជាជនរួបរួមគ្នាសម្អាតបរិស្ថានក្នុងភូមិ។" },
+                { word: "រីកចម្រើន", phonetic: "[រីក-ចំ-រើន]", pos: "កិរិយា", level: "medium", def: "លូតលាស់ទៅមុខឥតឈប់ឈរ។", example: "ប្រទេសជាតិយើងកំពុងមានការរីកចម្រើនលើគ្រប់វិស័យ។" },
+                { word: "ស្ងប់ស្ងាត់", phonetic: "[ស្ងប់-ស្ងាត់]", pos: "គុណនាម", level: "medium", def: "គ្មានសម្លេងរំខាន មានសេចក្តីស្ងប់។", example: "បណ្ណាល័យជាកន្លែងស្ងប់ស្ងាត់ល្អសម្រាប់អានសៀវភៅ។" },
+                // ពិបាក (១៦ ពាក្យ)
+                { word: "គតិបណ្ឌិត", phonetic: "[គៈ-តិ-ប័ន-ឌិត]", pos: "នាម", level: "hard", def: "គំនិតដ៏ឈ្លាសវៃរបស់អ្នកប្រាជ្ញដែលគួរយកតម្រាប់តាម។", example: "យើងគួរយកគតិបណ្ឌិតរបស់សម្តេចជួនណាតមកអនុវត្ត។" },
+                { word: "បុព្វបុរស", phonetic: "[ប៊ុប-ព្វាក់-បុ-រស់]", pos: "នាម", level: "hard", def: "មនុស្សជំនាន់មុនដែលជាអ្នកកសាងនិងការពារជាតិ។", example: "បុព្វបុរសខ្មែរបានកសាងប្រាសាទអង្គរវត្តដ៏អស្ចារ្យ។" },
+                { word: "អក្សរសិល្ប៍", phonetic: "[អាក់-ស-សិល]", pos: "នាម", level: "hard", def: "ស្នាដៃតែងនិពន្ធមានកំណាព្យ រឿងប្រលោមលោក។", example: "រឿងរាមកេរ្តិ៍ជាស្នាដៃអក្សរសិល្ប៍បុរាណដ៏ពិសិដ្ឋ។" },
+                { word: "អក្សរសាស្ត្រ", phonetic: "[អាក់-ស-សាស]", pos: "នាម", level: "hard", def: "ក្បួនខ្នាតនិងវិទ្យាសាស្ត្រស្តីពីភាសានិងអក្សរ។", example: "យើងត្រូវរួមគ្នាលើកស្ទួយអក្សរសាស្ត្រជាតិឱ្យរុងរឿង។" },
+                { word: "ទស្សនវិជ្ជា", phonetic: "[ទ័ស-សៈ-នៈ-វិច-ជា]", pos: "នាម", level: "hard", def: "វិជ្ជាស្តីពីគោលការណ៍នៃជីវិត ធម្មជាតិ និងពិភពលោក។", example: "ទស្សនវិជ្ជាព្រះពុទ្ធសាសនាបង្រៀនមនុស្សឱ្យរស់នៅដោយសន្តិ។" },
+                { word: "សង្គមវិទ្យា", phonetic: "[សង់-គម-វិច-ជា]", pos: "នាម", level: "hard", def: "វិទ្យាសាស្ត្រសិក្សាអំពីការរស់នៅនិងការប្រាស្រ័យក្នុងសង្គម។", example: "ការរៀនសង្គមវិទ្យាជួយឱ្យយល់ពីការវិវត្តនៃសង្គមមនុស្ស។" },
+                { word: "ជីវវិទ្យា", phonetic: "[ជី-វ៉ាក់-វិច-ជា]", pos: "នាម", level: "hard", def: "វិទ្យាសាស្ត្រសិក្សាអំពីភាវៈរស់ដូចជារុក្ខជាតិនិងសត្វ។", example: "ជីវវិទ្យាពន្យល់អំពីការលូតលាស់នៃសារពាង្គកាយ។" },
+                { word: "គីមីវិទ្យា", phonetic: "[គី-មី-វិច-ជា]", pos: "នាម", level: "hard", def: "វិទ្យាសាស្ត្រសិក្សាអំពីរូបធាតុនិងប្រតិកម្មគីមី។", example: "ពិសោធន៍គីមីវិទ្យាជួយរកឃើញសារធាតុថ្មីៗមានប្រយោជន៍។" },
+                { word: "រូបវិទ្យា", phonetic: "[រូប-វិច-ជា]", pos: "នាម", level: "hard", def: "វិទ្យាសាស្ត្រសិក្សាអំពីរូបធាតុ កម្លាំង ចលនា និងថាមពល។", example: "រូបវិទ្យាជាមូលដ្ឋានគ្រឹះនៃបច្ចេកវិទ្យាយានអវកាស។" },
+                { word: "គណិតវិទ្យា", phonetic: "[គាក់-ណិត-វិច-ជា]", pos: "នាម", level: "hard", def: "វិជ្ជាខាងការគិតលេខ ការវាស់វែង និងរូបរាងធរណីមាត្រ។", example: "គណិតវិទ្យាជួយបណ្តុះការគិតបែបហេតុផលនិងតក្កវិជ្ជា។" },
+                { word: "ភូមិវិទ្យា", phonetic: "[ភូ-មិ-វិច-ជា]", pos: "នាម", level: "hard", def: "វិជ្ជាសិក្សាអំពីផ្ទៃផែនដី អាកាសធាតុ និងការបែងចែកដែនដី។", example: "ភូមិវិទ្យាបង្ហាញពីធនធានធម្មជាតិតាមតំបន់នីមួយៗ។" },
+                { word: "សីលធម៌", phonetic: "[សីល-លាក់-ធ័រ]", pos: "នាម", level: "hard", def: "ច្បាប់នៃការរស់នៅល្អ មានចរិយាសម្បត្តិថ្លៃថ្នូរ។", example: "សីលធម៌ជាគ្រឹះនៃការរស់នៅប្រកបដោយសេចក្តីថ្លៃថ្នូរ។" },
+                { word: "គុណធម៌", phonetic: "[គុណ-ណៈ-ធ័រ]", pos: "នាម", level: "hard", def: "ធម៌ដែលនាំមកនូវគុណប្រយោជន៍ និងសេចក្តីស្ងប់សុខ។", example: "ការចេះជួយអ្នកដទៃជាគុណធម៌ដ៏ប្រពៃរបស់មនុស្ស។" },
+                { word: "យុត្តិធម៌", phonetic: "[យុត-តិ-ធ័រ]", pos: "នាម", level: "hard", def: "ភាពត្រឹមត្រូវ គ្មានលំអៀង គោរពតាមការពិត។", example: "តុលាការត្រូវកាត់ក្តីប្រកបដោយយុត្តិធម៌និងតម្លាភាព។" },
+                { word: "មេត្តាធម៌", phonetic: "[មេត-តា-ធ័រ]", pos: "នាម", level: "hard", def: "ចិត្តស្រឡាញ់ប្រាថ្នាឱ្យមនុស្សសត្វបានសេចក្តីសុខ។", example: "ព្រះពុទ្ធទ្រង់ប្រៀនប្រដៅឱ្យមានមេត្តាធម៌ចំពោះសព្វសត្វ។" },
+                { word: "ករុណាធម៌", phonetic: "[កាក់-រុ-ណា-ធ័រ]", pos: "នាម", level: "hard", def: "ចិត្តអាណិតអាសូរចង់ជួយសង្គ្រោះអ្នកមានទុក្ខ។", example: "ករុណាធម៌ជំរុញឱ្យមនុស្សជួយសង្គ្រោះជនរងគ្រោះ។" }
+            ],
+            "day_4": [
+                // ងាយ (១៦ ពាក្យ)
+                { word: "មាស", phonetic: "[មាស]", pos: "នាម", level: "easy", def: "លោហធាតុពណ៌លឿងមានតម្លៃខ្ពស់។", example: "ពេលវេលាមានតម្លៃប្រៀបដូចជាមាសប្រាក់។" },
+                { word: "ប្រាក់", phonetic: "[ប្រាក់]", pos: "នាម", level: "easy", def: "លោហធាតុពណ៌សភ្លឺ ឬប្រាក់កាសសម្រាប់ទិញទំនិញ។", example: "យើងត្រូវចេះសន្សំសំចៃប្រាក់កាសសម្រាប់អនាគត។" },
+                { word: "ថ្ម", phonetic: "[ថ្ម]", pos: "នាម", level: "easy", def: "ដុំរឹងកើតពីដីសម្រាប់សាងសង់ប្រាសាទ។", example: "ប្រាសាទបុរាណខ្មែរកសាងឡើងអំពីថ្មភក់យ៉ាងរឹងមាំ។" },
+                { word: "ឈើ", phonetic: "[ឈើ]", pos: "នាម", level: "easy", def: "ដើមឈើរឹងសម្រាប់ធ្វើផ្ទះ និងគ្រឿងសង្ហារិម។", example: "ជាងឈើឆ្លាក់ក្បាច់យ៉ាងរស់រវើកលើផ្ទាំងឈើផ្ចឹក។" },
+                { word: "ដែក", phonetic: "[ដែក]", pos: "នាម", level: "easy", def: "លោហធាតុរឹងសម្រាប់ធ្វើឧបករណ៍ប្រើប្រាស់។", example: "ជាងដែកដំដែកធ្វើជាកាំបិតនិងចបកាប់យ៉ាងស្ទាត់ជំនាញ។" },
+                { word: "កែវ", phonetic: "[កែវ]", pos: "នាម", level: "easy", def: "វត្ថុថ្លាសម្រាប់ដាក់ទឹកផឹក ឬត្បូងមានតម្លៃ។", example: "យើងត្រូវផឹកទឹកស្អាតមួយកែវរៀងរាល់ព្រឹក។" },
+                { word: "ខោ", phonetic: "[ខោ]", pos: "នាម", level: "easy", def: "សម្លៀកបំពាក់សម្រាប់ពាក់ពីចង្កេះចុះទៅជើង។", example: "សិស្សប្រុសស្លៀកខោពណ៌ខៀវយ៉ាងមានរបៀបរៀបរយ។" },
+                { word: "អាវ", phonetic: "[អាវ]", pos: "នាម", level: "easy", def: "សម្លៀកបំពាក់សម្រាប់ពាក់ផ្នែកខាងលើដងខ្លួន។", example: "សិស្សទាំងអស់ពាក់អាវសស្អាតបាតចូលរៀន។" },
+                { word: "មួក", phonetic: "[មួក]", pos: "នាម", level: "easy", def: "ប្រដាប់សម្រាប់ពាក់លើក្បាលបាំងកម្តៅថ្ងៃ។", example: "យើងត្រូវពាក់មួកសុវត្ថិភាពរាល់ពេលជិះម៉ូតូ។" },
+                { word: "ស្បែកជើង", phonetic: "[ស្បែក-ជើង]", pos: "នាម", level: "easy", def: "ប្រដាប់សម្រាប់ពាក់នឹងជើងការពារបន្លា។", example: "យើងត្រូវដោះស្បែកជើងដាក់លើធ្នើរឱ្យមានរបៀប។" },
+                { word: "តុ", phonetic: "[តុ]", pos: "នាម", level: "easy", def: "គ្រឿងសង្ហារិមមានជើងសម្រាប់ដាក់សម្ភារសរសេរ។", example: "សិស្សជូតសម្អាតតុរៀនឱ្យស្អាតមុនពេលចេញទៅផ្ទះ។" },
+                { word: "កៅអី", phonetic: "[កៅ-អី]", pos: "នាម", level: "easy", def: "គ្រឿងសង្ហារិមសម្រាប់អង្គុយរៀន ឬធ្វើការ។", example: "ចូររៀបចំកៅអីឱ្យត្រង់ជួរក្រោយពេលរៀនចប់។" },
+                { word: "ទ្វារ", phonetic: "[ទ្វារ]", pos: "នាម", level: "easy", def: "ច្រកសម្រាប់ចេញចូលផ្ទះ ឬបន្ទប់រៀន។", example: "យើងត្រូវបិទទ្វារថ្នាក់រៀនថ្នមៗកុំឱ្យមានសម្លេងខ្លាំង។" },
+                { word: "បង្អួច", phonetic: "[បង្-អួច]", pos: "នាម", level: "easy", def: "ច្រកខ្យល់និងពន្លឺនៅលើជញ្ជាំងផ្ទះ។", example: "បើកបង្អួចឱ្យខ្យល់អាកាសបរិសុទ្ធចូលក្នុងថ្នាក់រៀន។" },
+                { word: "ជញ្ជាំង", phonetic: "[ជញ្-ជាំង]", pos: "នាម", level: "easy", def: "រនាំងបាំងជុំវិញផ្ទះ ឬបន្ទប់រៀន។", example: "នៅលើជញ្ជាំងថ្នាក់មានបិទរូបភាពគំនូរនិងពាក្យស្លោក។" },
+                { word: "ដំបូល", phonetic: "[ដំ-បូល]", pos: "នាម", level: "easy", def: "ផ្នែកខាងលើនៃផ្ទះសម្រាប់បាំងថ្ងៃភ្លៀង។", example: "ដំបូលសាលារៀនប្រក់ក្បឿងពណ៌ក្រហមស្រស់ស្អាត។" },
+                // មធ្យម (១៦ ពាក្យ)
+                { word: "កម្សាន្ត", phonetic: "[កំ-សាន]", pos: "កិរិយា", level: "medium", def: "លំហែកាយឱ្យសប្បាយចិត្តបាត់ការនឿយហត់។", example: "នៅថ្ងៃឈប់សម្រាកគ្រួសារយើងទៅកម្សាន្តនៅមាត់សមុទ្រ។" },
+                { word: "ត្រកូល", phonetic: "[ត្រ-កូល]", pos: "នាម", level: "medium", def: "វង្សត្រកូល ឬពូជពង្សវង្សាញាតិ។", example: "កូនល្អតែងរក្សាកិត្តិយសវង្សត្រកូលឱ្យបានគង់វង្ស។" },
+                { word: "ក្រអូប", phonetic: "[ក្រ-អូប]", pos: "គុណនាម", level: "medium", def: "មានក្លិនឈ្ងុយគួរឱ្យចង់ហិត។", example: "ផ្កាចំប៉ាបញ្ចេញក្លិនក្រអូបសាយពេញបរិវេណផ្ទះ។" },
+                { word: "ក្រឡេក", phonetic: "[ក្រ-ឡេក]", pos: "កិរិយា", level: "medium", def: "ងាកមើលមួយភ្លែតដោយរហ័ស។", example: "សិស្សក្រឡេកមើលនាឡិកាដើម្បីដឹងម៉ោងចេញលេង។" },
+                { word: "ក្សេត្រ", phonetic: "[ក្សែត]", pos: "នាម", level: "medium", def: "វាលស្រែ ឬដីសម្រាប់ដាំដុះកសិកម្ម។", example: "កសិករកំពុងប្រមូលផលស្រូវលើក្សេត្រដ្ឋានដ៏ធំធេង។" },
+                { word: "សម្តេច", phonetic: "[សំ-ដេច]", pos: "នាម", level: "medium", def: "គោរមងារខ្ពង់ខ្ពស់ថ្វាយព្រះសង្ឃ ឬថ្នាក់ដឹកនាំរដ្ឋ។", example: "សម្តេចព្រះសង្ឃរាជជួនណាតជាមហាវីរបុរសអក្សរសាស្ត្រ។" },
+                { word: "ព្រះពុទ្ធ", phonetic: "[ព្រះ-ពុត]", pos: "នាម", level: "medium", def: "ព្រះបរមសាស្តាអ្នកត្រាស់ដឹងនូវសច្ចធម៌។", example: "ព្រះពុទ្ធទ្រង់ប្រៀនប្រដៅមនុស្សឱ្យប្រព្រឹត្តតែអំពើល្អ។" },
+                { word: "កោតក្រែង", phonetic: "[កោត-ក្រែង]", pos: "កិរិយា", level: "medium", def: "គោរពនិងយល់ចិត្តដោយសុជីវធម៌ខ្ពស់។", example: "យើងត្រូវចេះកោតក្រែងចិត្តចាស់ទុំនិងអ្នកមានគុណ។" },
+                { word: "រៀបចំ", phonetic: "[រៀប-ចំ]", pos: "កិរិយា", level: "medium", def: "ចាត់ចែងឱ្យមានរបៀបរៀបរយត្រឹមត្រូវ។", example: "សិស្សជួយរៀបចំតុសៀវភៅក្នុងបណ្ណាល័យឱ្យមានសណ្តាប់ធ្នាប់។" },
+                { word: "ដោះស្រាយ", phonetic: "[ដោះ-ស្រាយ]", pos: "កិរិយា", level: "medium", def: "រកវិធីបញ្ចប់បញ្ហា ឬវិវាទផ្សេងៗ។", example: "យើងត្រូវដោះស្រាយវិវាទដោយសន្តិវិធីនិងការយោគយល់។" },
+                { word: "ស្វាគមន៍", phonetic: "[ស្វា-គម]", pos: "កិរិយា", level: "medium", def: "ទទួលរាក់ទាក់ដោយស្នាមញញឹមនិងសេចក្តីរីករាយ។", example: "សិស្សានុសិស្សសូមស្វាគមន៍យ៉ាងកក់ក្តៅចំពោះគណៈប្រតិភូ។" },
+                { word: "សរសើរ", phonetic: "[សរ-សើ]", pos: "កិរិយា", level: "medium", def: "ពោលពាក្យលើកតម្កើងចំពោះអំពើល្អរបស់គេ។", example: "លោកគ្រូសរសើរសិស្សដែលខិតខំរៀនសូត្របានពិន្ទុល្អ។" },
+                { word: "អភ័យទោស", phonetic: "[អាក់-ភៃ-ទោស]", pos: "កិរិយា", level: "medium", def: "លើកលែងទោសមិនប្រកាន់ទោសពៃរ៍តទៅទៀត។", example: "ការចេះអភ័យទោសឱ្យគ្នាធ្វើឱ្យសង្គមមានសន្តិភាព។" },
+                { word: "លះបង់", phonetic: "[លះ-បង់]", pos: "កិរិយា", level: "medium", def: "លះរបស់ផ្ទាល់ខ្លួនដើម្បីប្រយោជន៍រួម។", example: "វីរជនបានលះបង់ជីវិតដើម្បីបុព្វហេតុការពារជាតិ។" },
+                { word: "រួសរាយ", phonetic: "[រួស-រាយ]", pos: "គុណនាម", level: "medium", def: "មានទឹកមុខញញឹមរាក់ទាក់គួរឱ្យស្រឡាញ់។", example: "ចរិតរួសរាយរាក់ទាក់ធ្វើឱ្យមនុស្សគ្រប់គ្នាចង់រាប់អាន។" },
+                { word: "ថ្លៃថ្នូរ", phonetic: "[ថ្លៃ-ថ្នូរ]", pos: "គុណនាម", level: "medium", def: "មានតម្លៃខ្ពង់ខ្ពស់គួរជាទីគោរពសរសើរ។", example: "សីលធម៌ល្អធ្វើឱ្យមនុស្សមានតម្លៃថ្លៃថ្នូរក្នុងសង្គម។" },
+                // ពិបាក (១៦ ពាក្យ)
+                { word: "អធិបតេយ្យភាព", phonetic: "[អាក់-ធិ-ប៉ាក់-តៃ-យ៉ាក់-ភាព]", pos: "នាម", level: "hard", def: "អំណាចកំពូលពេញលេញក្នុងការដឹកនាំនិងគ្រប់គ្រងប្រទេស។", example: "កងទ័ពកម្ពុជាប្តេជ្ញាការពារអធិបតេយ្យភាពជាតិឱ្យបានរឹងមាំ។" },
+                { word: "បូរណភាពទឹកដី", phonetic: "[បូ-រ៉ាក់-ណៈ-ភាព-ទឹក-ដី]", pos: "នាម", level: "hard", def: "ភាពពេញលេញនៃដែនដីជាតិដោយគ្មានការបាត់បង់។", example: "យើងទាំងអស់គ្នាត្រូវរួមសាមគ្គីការពារបូរណភាពទឹកដី។" },
+                { word: "ពិធីបុណ្យជាតិ", phonetic: "[ពិ-ធី-បុណ-ជាតិ]", pos: "នាម", level: "hard", def: "បុណ្យប្រពៃណី ឬបុណ្យរដ្ឋដែលប្រារព្ធឡើងទូទាំងប្រទេស។", example: "ពិធីបុណ្យអុំទូកជាពិធីបុណ្យជាតិដ៏ធំអស្ចារ្យនៅកម្ពុជា។" },
+                { word: "សច្ចធម៌សង្គម", phonetic: "[សាច់-ចាក់-ធ័រ-សង់-គម]", pos: "នាម", level: "hard", def: "ការពិតនិងភាពត្រឹមត្រូវក្នុងការរស់នៅជាមួយគ្នាក្នុងសង្គម។", example: "សច្ចធម៌សង្គមជាគ្រឹះនៃការកសាងទំនុកចិត្តរវាងមនុស្ស។" },
+                { word: "សង្គមជាតិ", phonetic: "[សង់-គម-ជាតិ]", pos: "នាម", level: "hard", def: "ប្រជាជនដែលរួមរស់នៅក្នុងប្រទេសតែមួយក្រោមច្បាប់តែមួយ។", example: "ការអប់រំជាសសរទ្រូងដ៏សំខាន់ក្នុងការអភិវឌ្ឍសង្គមជាតិ។" },
+                { word: "កាតព្វកិច្ច", phonetic: "[កា-តាប់-ព្វាក់-កិច]", pos: "នាម", level: "hard", def: "ភារកិច្ចដែលត្រូវតែធ្វើខានមិនបានតាមច្បាប់ ឬសីលធម៌។", example: "ការទៅបោះឆ្នោតជាកាតព្វកិច្ចរបស់ប្រជាពលរដ្ឋគ្រប់រូប។" },
+                { word: "ទំនួលខុសត្រូវ", phonetic: "[ទំ-នួល-ខុស-ត្រូវ]", pos: "នាម", level: "hard", def: "ការទទួលរ៉ាប់រងលើផលវិបាកនៃទង្វើរបស់ខ្លួន។", example: "សិស្សល្អត្រូវមានទំនួលខុសត្រូវលើការរៀនសូត្ររបស់ខ្លួន។" },
+                { word: "សាមគ្គីភាព", phonetic: "[សា-ម័ក-គី-ភាព]", pos: "នាម", level: "hard", def: "ភាពរួបរួមគ្នាជាធ្លុងមួយក្នុងការបំពេញការងាររួម។", example: "សាមគ្គីភាពរវាងប្រជាជននាំមកនូវកម្លាំងមហាសាល។" },
+                { word: "ស្វ័យភាព", phonetic: "[ស្វៃ-យ៉ាក់-ភាព]", pos: "នាម", level: "hard", def: "ភាពម្ចាស់ការលើខ្លួនឯងដោយមិនពឹងផ្អែកលើអ្នកដទៃ។", example: "សាលារៀនលើកទឹកចិត្តឱ្យសិស្សមានស្វ័យភាពក្នុងការគិត។" },
+                { word: "នវានុវត្តន៍", phonetic: "[នាក់-វ៉ា-នុ-វ៉ាត់]", pos: "នាម", level: "hard", def: "ការបង្កើតថ្មីនូវគំនិត វិធីសាស្ត្រ ឬបច្ចេកវិទ្យាថ្មីៗ។", example: "នវានុវត្តន៍បច្ចេកវិទ្យាជួយសម្រួលដល់ការសិក្សារបស់សិស្ស។" },
+                { word: "ចីរភាព", phonetic: "[ជី-រ៉ាក់-ភាព]", pos: "នាម", level: "hard", def: "ភាពស្ថិតស្ថេរគង់វង្សយូរអង្វែងមិនងាយខូចបង់។", example: "ការអភិវឌ្ឍប្រកបដោយចីរភាពគិតគូរដល់បរិស្ថានធម្មជាតិ។" },
+                { word: "បរិស្ថានវិទ្យា", phonetic: "[បៈ-រិ-ស្ថាន-វិច-ជា]", pos: "នាម", level: "hard", def: "វិទ្យាសាស្ត្រសិក្សាអំពីទំនាក់ទំនងរវាងភាវៈរស់និងធម្មជាតិ។", example: "ការរៀនបរិស្ថានវិទ្យាជួយឱ្យយើងស្រឡាញ់និងការពារធម្មជាតិ។" },
+                { word: "អភិរក្សនិយម", phonetic: "[អាក់-ភិ-រ៉ាក់-និ-យំ]", pos: "នាម", level: "hard", def: "គោលគំនិតនៃការថែរក្សាកេរដំណែលនិងប្រពៃណីឱ្យគង់វង្ស។", example: "ការអភិរក្សប្រាសាទបុរាណទាមទារការចូលរួមពីអ្នកជំនាញ។" },
+                { word: "បច្ចេកវិទ្យា", phonetic: "[បាច់-ចេក-កាក់-វិច-ជា]", pos: "នាម", level: "hard", def: "ចំណេះដឹងវិទ្យាសាស្ត្រដែលយកមកប្រើក្នុងការអនុវត្តជាក់ស្តែង។", example: "បច្ចេកវិទ្យាឌីជីថលជួយឱ្យការរៀនសូត្រកាន់តែងាយស្រួល។" },
+                { word: "ទំនាក់ទំនង", phonetic: "[ទំ-នាក់-ទំ-នង]", pos: "នាម", level: "hard", def: "ការប្រាស្រ័យទាក់ទងគ្នាទៅវិញទៅមកតាមមធ្យោបាយផ្សេងៗ។", example: "ការទំនាក់ទំនងល្អជាស្ពានចម្លងនូវសេចក្តីស្រឡាញ់។" },
+                { word: "វិជ្ជាជីវៈ", phonetic: "[វិច-ជា-ជី-វ៉ាក់]", pos: "នាម", level: "hard", def: "មុខរបរ ឬការងារជំនាញដែលទាមទារការបណ្តុះបណ្តាលច្បាស់លាស់។", example: "លោកគ្រូអ្នកគ្រូមានក្រមសីលធម៌វិជ្ជាជីវៈខ្ពង់ខ្ពស់។" }
+            ],
+            "day_5": [
+                // ងាយ (១៦ ពាក្យ)
+                { word: "ខ្លា", phonetic: "[ខ្លា]", pos: "នាម", level: "easy", def: "សត្វសាហាវរស់នៅក្នុងព្រៃមានឆ្នូតៗលើខ្លួន។", example: "ខ្លាជាសត្វព្រៃកម្រដែលត្រូវទទួលបានការការពារ។" },
+                { word: "ដំរី", phonetic: "[ដំ-រី]", pos: "នាម", level: "easy", def: "សត្វចតុបាទមាឌធំមានភ្លុកវែង និងប្រមោយ។", example: "ដំរីជាសត្វតំណាងឱ្យកម្លាំងដ៏មហិមានិងសេចក្តីស្ងប់។" },
+                { word: "សត្វស្លាប", phonetic: "[សាត់-ស្លាប]", pos: "នាម", level: "easy", def: "សត្វមានស្លាបអាចហើរលើអាកាសបាន។", example: "ហ្វូងសត្វស្លាបហើរត្រឡប់មកទ្រនំវិញនាពេលល្ងាច។" },
+                { word: "ព្រៃ", phonetic: "[ព្រៃ]", pos: "នាម", level: "easy", def: "ទីកន្លែងសម្បូរដើមឈើធំៗ និងសត្វព្រៃរស់នៅ។", example: "ព្រៃឈើជាជម្រកដ៏សុខសាន្តរបស់សត្វព្រៃទាំងឡាយ។" },
+                { word: "បឹង", phonetic: "[បឹង]", pos: "នាម", level: "easy", def: "អន្លង់ទឹកធំធម្មជាតិដែលព័ទ្ធជុំវិញដោយដីគោក។", example: "បឹងទន្លេសាបជាប្រភពត្រីទឹកសាបដ៏ធំបំផុតនៅអាស៊ី។" },
+                { word: "ទន្លេ", phonetic: "[ទន់-លេ]", pos: "នាម", level: "easy", def: "ផ្លូវទឹកធម្មជាតិធំទូលាយហូរធ្លាក់ទៅសមុទ្រ។", example: "ទន្លេមេគង្គហូរកាត់ប្រទេសជាច្រើនមុនធ្លាក់ដល់សមុទ្រ។" },
+                { word: "សមុទ្រ", phonetic: "[សៈ-មុត]", pos: "នាម", level: "easy", def: "ផ្ទៃទឹកប្រៃធំល្វឹងល្វើយព័ទ្ធជុំវិញទ្វីប។", example: "ខេត្តព្រះសីហនុមានឆ្នេរសមុទ្រដ៏ស្រស់ស្អាតទាក់ទាញទេសចរ។" },
+                { word: "កោះ", phonetic: "[កោះ]", pos: "នាម", level: "easy", def: "ដីគោកដែលមានទឹកព័ទ្ធជុំវិញគ្រប់ទិស។", example: "កោះរ៉ុងមានឆ្នេរខ្សាច់សក្បុសគួរជាទីកម្សាន្ត។" },
+                { word: "ជ្រោះ", phonetic: "[ជ្រោះ]", pos: "នាម", level: "easy", def: "ទឹកធ្លាក់ពីលើភ្នំខ្ពស់ចុះមកជ្រលងដី។", example: "ទឹកជ្រោះជ្រាវមានសម្លេងហូរកញ្ជ្រៀវយ៉ាងពីរោះ។" },
+                { word: "ពពក", phonetic: "[ព-ពក]", pos: "នាម", level: "easy", def: "ចំហាយទឹកដែលរសាត់អណ្តែតលើផ្ទៃមេឃ។", example: "ដុំពពកពណ៌សរសាត់អណ្តែតលើមេឃពណ៌ខៀវស្រងាត់។" },
+                { word: "រន្ទះ", phonetic: "[រុន-ទះ]", pos: "នាម", level: "easy", def: "ពន្លឺនិងសម្លេងផ្គរលាន់ខ្លាំងពេលមានភ្លៀងធ្លាក់។", example: "ពេលមានផ្គររន្ទះយើងមិនត្រូវជ្រកក្រោមដើមឈើធំឡើយ។" },
+                { word: "ព្រះអាទិត្យ", phonetic: "[ព្រះ-អា-ទិត]", pos: "នាម", level: "easy", def: "ផ្កាយធំកណ្តាលដែលផ្តល់ពន្លឺនិងកម្តៅដល់ផែនដី។", example: "ព្រះអាទិត្យផ្តល់ពន្លឺជួយឱ្យរុក្ខជាតិលូតលាស់ល្អ។" },
+                { word: "ព្រះចន្ទ", phonetic: "[ព្រះ-ច័ន]", pos: "នាម", level: "easy", def: "ដួងតារាបំភ្លឺរាត្រីមានពន្លឺត្រជាក់ស្រទន់។", example: "រាត្រីថ្ងៃពេញបូណ៌មីមានពន្លឺព្រះចន្ទភ្លឺថ្លា។" },
+                { word: "ផ្កាយ", phonetic: "[ផ្កាយ]", pos: "នាម", level: "easy", def: "ដួងតារាតូចៗភ្លឺផ្លេកៗលើមេឃនារាត្រី។", example: "ផ្កាយព្រោងព្រាតបញ្ចេញរស្មីភ្លឺភ្លេកពេញផ្ទៃអាកាស។" },
+                { word: "មេឃ", phonetic: "[មេឃ]", pos: "នាម", level: "easy", def: "លំហអាកាសធំល្វឹងល្វើយនៅខាងលើផែនដី។", example: "ផ្ទៃមេឃស្រឡះល្អគ្មានពពកខ្មៅបាំងឡើយ។" },
+                { word: "រលក", phonetic: "[រ-លក]", pos: "នាម", level: "easy", def: "ចលនាទឹកសមុទ្រ ឬបឹងដែលបក់បោកមកច្រាំង។", example: "រលកសមុទ្របោកបក់មកលើឆ្នេរខ្សាច់សក្បុស។" },
+                // មធ្យម (១៦ ពាក្យ)
+                { word: "បរិស្ថាន", phonetic: "[បៈ-រិ-ស្ថាន]", pos: "នាម", level: "medium", def: "អ្វីៗគ្រប់យ៉ាងដែលនៅជុំវិញខ្លួនមនុស្សនិងសត្វ។", example: "យើងត្រូវរួមគ្នាថែរក្សាបរិស្ថានឱ្យស្អាតនិងបៃតង។" },
+                { word: "អនាម័យសាលា", phonetic: "[អៈ-ណា-ម៉ី-សា-លា]", pos: "នាម", level: "medium", def: "ការថែរក្សាភាពស្អាតក្នុងបរិវេណសាលារៀន។", example: "អនាម័យសាលានាំមកនូវសុខភាពល្អដល់សិស្សទាំងអស់គ្នា។" },
+                { word: "ប្រពៃណី", phonetic: "[ប្រាក់-ពៃ-ណី]", pos: "នាម", level: "medium", def: "ទំនៀមទម្លាប់ល្អដែលដូនតាបន្សល់ទុកតៗគ្នា។", example: "ពិធីបុណ្យភ្ជុំបិណ្ឌជាប្រពៃណីទំនៀមទម្លាប់ខ្មែរដ៏ពិសិដ្ឋ។" },
+                { word: "ទំនៀមទម្លាប់", phonetic: "[ទំ-នៀម-ទំ-លាប់]", pos: "នាម", level: "medium", def: "ទម្លាប់ដែលមនុស្សក្នុងសង្គមប្រកាន់ធ្វើជាទូទៅ។", example: "ការសំពះគោរពចាស់ទុំជាទំនៀមទម្លាប់ដ៏ស្រស់ស្អាតរបស់ខ្មែរ។" },
+                { word: "កេរមរតក", phonetic: "[កេរ-ម-រ៉ាក់-ដក]", pos: "នាម", level: "medium", def: "ទ្រព្យសម្បត្តិ ឬតម្លៃវប្បធម៌ដែលដូនតាបន្សល់ទុក។", example: "ប្រាសាទបុរាណជាកេរមរតកដូនតាដែលមិនអាចកាត់ថ្លៃបាន។" },
+                { word: "សិល្បករ", phonetic: "[សិល-ប៉ាក់-ក]", pos: "នាម", level: "medium", def: "អ្នកបង្កើតស្នាដៃសិល្បៈ ដូចជាគំនូរ ចម្លាក់ ឬតន្ត្រី។", example: "សិល្បករខ្មែរបានសម្តែងរបាំបុរាណយ៉ាងរស់រវើកនៅលើឆាក។" },
+                { word: "តន្ត្រី", phonetic: "[តន់-ត្រី]", pos: "នាម", level: "medium", def: "សម្លេងរៀបចំឡើងជាបទភ្លេងយ៉ាងពីរោះរណ្តំ។", example: "តន្ត្រីបុរាណខ្មែរបន្លឺសម្លេងយ៉ាងពីរោះរណ្តំចិត្ត។" },
+                { word: "គំនូរ", phonetic: "[គំ-នូរ]", pos: "នាម", level: "medium", def: "រូបភាពដែលគូរឡើងដោយដៃប្រើជក់ និងពណ៌ចម្រុះ។", example: "គំនូរបុរាណលើជញ្ជាំងវត្តមានតម្លៃប្រវត្តិសាស្ត្រខ្ពស់។" },
+                { word: "ចម្លាក់", phonetic: "[ចំ-ឡាក់]", pos: "នាម", level: "medium", def: "ស្នាដៃឆ្លាក់លើថ្ម ឈើ ឬលោហធាតុជារូបរាងផ្សេងៗ។", example: "ចម្លាក់អប្សរានៅប្រាសាទអង្គរវត្តមានសម្រស់ទន់ភ្លន់។" },
+                { word: "អក្សរឆ្លាក់", phonetic: "[អាក់-ស-ឆ្លាក់]", pos: "នាម", level: "medium", def: "អក្សរដែលសរសេរ ឬឆ្លាក់ឡើងយ៉ាងល្អប្រណីត។", example: "អក្សរឆ្លាក់លើផ្ទាំងថ្មប្រាសាទជាសក្ខីភាពនៃប្រវត្តិសាស្ត្រ។" },
+                { word: "ភាសាជាតិ", phonetic: "[ភា-សា-ជាតិ]", pos: "នាម", level: "medium", def: "ភាសាផ្លូវការដែលប្រើប្រាស់ទូទាំងប្រទេស។", example: "ភាសាខ្មែរជាភាសាជាតិដ៏ចំណាស់និងសម្បូរបែបនៅអាស៊ី។" },
+                { word: "អក្សរសាស្ត្រជាតិ", phonetic: "[អាក់-ស-សាស-ជាតិ]", pos: "នាម", level: "medium", def: "វិជ្ជាអក្សរសាស្ត្រដែលជាអត្តសញ្ញាណរបស់ជាតិ។", example: "ការថែរក្សាអក្សរសាស្ត្រជាតិជាកាតព្វកិច្ចកូនខ្មែរគ្រប់រូប។" },
+                { word: "មោទនភាព", phonetic: "[ម៉ោ-ទាក់-នាក់-ភាព]", pos: "នាម", level: "medium", def: "សេចក្តីរីករាយនិងសរសើរចំពោះភាពជោគជ័យនៃជាតិ។", example: "យើងមានមោទនភាពចំពោះប្រាសាទអង្គរវត្តជាសម្បត្តិពិភពលោក។" },
+                { word: "អត្តសញ្ញាណ", phonetic: "[អ័ត-តាក់-ស័ញ-ញាន]", pos: "នាម", level: "medium", def: "លក្ខណៈសម្គាល់ពិសេសដែលបញ្ជាក់ពីភាពជាខ្មែរ។", example: "ក្រមាខ្មែរជាអត្តសញ្ញាណវប្បធម៌ដ៏លេចធ្លោមួយរបស់ជាតិ។" },
+                { word: "សាមគ្គីសង្គម", phonetic: "[សា-ម័ក-គី-សង់-គម]", pos: "នាម", level: "medium", def: "ការរួបរួមគ្នារបស់មនុស្សក្នុងសង្គមដើម្បីសេចក្តីសុខរួម។", example: "សាមគ្គីសង្គមជាគ្រឹះរឹងមាំនៃការអភិវឌ្ឍប្រទេសជាតិ។" },
+                { word: "សន្តិសុខ", phonetic: "[សន់-តិ-សុខ]", pos: "នាម", level: "medium", def: "ភាពស្ងប់សុខ គ្មានចោរកម្ម និងគ្មានអំពើហិង្សា។", example: "កងកម្លាំងមានសមត្ថកិច្ចការពារសន្តិសុខជូនប្រជាជនជានិច្ច។" },
+                // ពិបាក (១៦ ពាក្យ)
+                { word: "សច្ចធម៌ប្រវត្តិសាស្ត្រ", phonetic: "[សាច់-ចាក់-ធ័រ-ប្រ-វ័ត-តិ-សាស]", pos: "នាម", level: "hard", def: "ការពិតជាក់ស្តែងដែលបានចារទុកក្នុងប្រវត្តិសាស្ត្រជាតិ។", example: "សិលាចារឹកជាភស្តុតាងរឹងមាំនៃសច្ចធម៌ប្រវត្តិសាស្ត្រខ្មែរ។" },
+                { word: "ព្រហ្មវិហារធម៌", phonetic: "[ព្រុំ-មាក់-វិ-ហា-ធ័រ]", pos: "នាម", level: "hard", def: "ធម៌ដ៏ប្រសើរ ៤ យ៉ាង (មេត្តា ករុណា មុទិតា ឧបេក្ខា)។", example: "អ្នកដឹកនាំល្អតែងប្រកាន់ខ្ជាប់នូវព្រហ្មវិហារធម៌ក្នុងចិត្ត។" },
+                { word: "គរុកោសល្យទំនើប", phonetic: "[គុ-រុ-កោ-សល់-ទំ-នើប]", pos: "នាម", level: "hard", def: "វិធីសាស្ត្របង្រៀនថ្មីៗដែលយកសិស្សជាមជ្ឈមណ្ឌលនៃការរៀន។", example: "គ្រូប្រើគរុកោសល្យទំនើបក្នុងការជំរុញស្វ័យសិក្សារបស់សិស្ស។" },
+                { word: "អភិបាលកិច្ចល្អ", phonetic: "[អាក់-ភិ-បាល-កិច-ល្អ]", pos: "នាម", level: "hard", def: "ការដឹកនាំរដ្ឋដោយតម្លាភាព គណនេយ្យភាព និងយុត្តិធម៌។", example: "អភិបាលកិច្ចល្អនាំមកនូវការអភិវឌ្ឍសង្គមប្រកបដោយចីរភាព។" },
+                { word: "ស្មារតីទទួលខុសត្រូវ", phonetic: "[ស្មា-រ៉ាក់-តី-ទ-ទួល-ខុស-ត្រូវ]", pos: "នាម", level: "hard", def: "ការដឹងខ្លួនច្បាស់ក្នុងការបំពេញកាតព្វកិច្ចឱ្យបានល្អ។", example: "ស្មារតីទទួលខុសត្រូវជាគុណសម្បត្តិមិនអាចខ្វះបានរបស់ពលរដ្ឋ។" },
+                { word: "នីតិរដ្ឋ", phonetic: "[នី-តិ-រ័ត]", pos: "នាម", level: "hard", def: "រដ្ឋដែលគ្រប់គ្រងដោយគោរពតាមច្បាប់ជាធំ។", example: "ការកសាងនីតិរដ្ឋធានានូវយុត្តិធម៌សង្គមនិងសិទ្ធិសេរីភាព។" },
+                { word: "លទ្ធិប្រជាធិបតេយ្យ", phonetic: "[លិត-ធិ-ប្រ-ជា-ធិប-ប៉ាក់-តៃ]", pos: "នាម", level: "hard", def: "ប្រព័ន្ធដឹកនាំដែលអំណាចកើតចេញពីឆន្ទៈប្រជាពលរដ្ឋ។", example: "លទ្ធិប្រជាធិបតេយ្យលើកកម្ពស់សិទ្ធិនិងសេរីភាពបញ្ចេញមតិ។" },
+                { word: "សកលភាវូបនីយកម្ម", phonetic: "[សាក់-កល់-ភា-វូ-ប៉ាក់-នី-យាក់-ក័ម]", pos: "នាម", level: "hard", def: "ការផ្សារភ្ជាប់ពិភពលោកទាំងមូលតាមរយៈសេដ្ឋកិច្ចនិងបច្ចេកវិទ្យា។", example: "សកលភាវូបនីយកម្មតម្រូវឱ្យយើងពង្រឹងចំណេះដឹងភាសាបរទេស។" },
+                { word: "នវានុវត្តន៍ឌីជីថល", phonetic: "[នាក់-វ៉ា-នុ-វ៉ាត់-ឌី-ជី-ថល់]", pos: "នាម", level: "hard", def: "ការច្នៃប្រឌិតបច្ចេកវិទ្យាព័ត៌មានវិទ្យាថ្មីៗបម្រើការងារ។", example: "នវានុវត្តន៍ឌីជីថលជួយជំរុញល្បឿននៃការអភិវឌ្ឍសេដ្ឋកិច្ច។" },
+                { word: "បញ្ញាសិប្បនិម្មិត", phonetic: "[ប័ញ-ញា-សិប-ប៉ាក់-និម-មិត]", pos: "នាម", level: "hard", def: "បច្ចេកវិទ្យាកុំព្យូទ័រឆ្លាតវៃដែលអាចគិតនិងវិភាគដូចមនុស្ស។", example: "បញ្ញាសិប្បនិម្មិតកំពុងផ្លាស់ប្តូររបៀបរៀនសូត្ររបស់សិស្ស។" },
+                { word: "ចីរភាពបរិស្ថាន", phonetic: "[ជី-រ៉ាក់-ភាព-បៈ-រិ-ស្ថាន]", pos: "នាម", level: "hard", def: "ការប្រើប្រាស់ធនធានធម្មជាតិដោយមិនបំផ្លាញដល់អនាគត។", example: "ចីរភាពបរិស្ថានទាមទារការកាត់បន្ថយការប្រើប្រាស់ថង់ប្លាស្ទិក។" },
+                { word: "សន្តិសហវិជ្ជមាន", phonetic: "[សន់-តិ-សៈ-ហាក់-វិច-ជៈ-មាន]", pos: "នាម", level: "hard", def: "ការរួមរស់នៅជាមួយគ្នាដោយសន្តិភាពនិងគ្មានជម្លោះ។", example: "ប្រទេសជិតខាងត្រូវប្រកាន់ខ្ជាប់នូវសន្តិសហវិជ្ជមាន។" },
+                { word: "បូរណភាពសង្គម", phonetic: "[បូ-រ៉ាក់-ណៈ-ភាព-សង់-គម]", pos: "នាម", level: "hard", def: "ភាពរឹងមាំនិងមិនបែកបាក់គ្នានៃសង្គមជាតិទាំងមូល។", example: "សាមគ្គីភាពជាតិជាសសរទ្រូងនៃបូរណភាពសង្គមខ្មែរ។" },
+                { word: "កិត្តិនាមជាតិ", phonetic: "[កិត-តិ-នាម-ជាតិ]", pos: "នាម", level: "hard", def: "ឈ្មោះល្បីល្បាញនិងកិត្តិយសរបស់ប្រទេសលើឆាកអន្តរជាតិ។", example: "កីឡាករខ្មែរបានលើកកម្ពស់កិត្តិនាមជាតិលើឆាកអន្តរជាតិ។" },
+                { word: "មហាសមុទ្រ", phonetic: "[មៈ-ហា-សៈ-មុត]", pos: "នាម", level: "hard", def: "ផ្ទៃទឹកប្រៃដ៏ធំមហិមាដែលគ្របដណ្តប់លើផ្ទៃផែនដី។", example: "មហាសមុទ្រដើរតួនាទីយ៉ាងសំខាន់ក្នុងការរក្សាតុល្យភាពអាកាសធាតុ។" },
+                { word: "ឧត្តមគតិ", phonetic: "[អ៊ុត-ដំ-គាក់-តិ]", pos: "នាម", level: "hard", def: "គំនិតដ៏ខ្ពង់ខ្ពស់ដែលមនុស្សប្រកាន់យកជាគោលដៅជីវិត។", example: "យុវជនគួរមានឧត្តមគតិស្រឡាញ់ជាតិនិងបម្រើប្រជាជន។" }
+            ],
+            "day_6": [
+                // ងាយ (១៦ ពាក្យ)
+                { word: "សៀវភៅកត់", phonetic: "[សៀវ-ភៅ-កត់]", pos: "នាម", level: "easy", def: "សៀវភៅសម្រាប់សរសេរកត់ត្រាមេរៀនក្នុងថ្នាក់។", example: "ខ្ញុំកត់ត្រាមេរៀនយ៉ាងស្អាតនៅក្នុងសៀវភៅកត់។" },
+                { word: "បន្ទាត់", phonetic: "[បន់-ទាត់]", pos: "នាម", level: "easy", def: "ឧបករណ៍ធ្វើពីឈើ ឬជ័រសម្រាប់គូសបន្ទាត់ឱ្យត្រង់។", example: "សិស្សប្រើបន្ទាត់គូសបន្ទាត់ពីក្រោមចំណងជើងមេរៀន។" },
+                { word: "ជ័រលុប", phonetic: "[ជ័រ-លុប]", pos: "នាម", level: "easy", def: "ដុំជ័រទន់សម្រាប់លុបស្នាមខ្មៅដៃដែលសរសេរខុស។", example: "ពេលសរសេរខ្មៅដៃខុសយើងប្រើជ័រលុបជូតសម្អាត។" },
+                { word: "ខ្មៅដៃ", phonetic: "[ខ្មៅ-ដៃ]", pos: "នាម", level: "easy", def: "ប្រដាប់សរសេរធ្វើពីឈើមានស្នូលក្រាហ្វិតខាងក្នុង។", example: "កុមារតូចៗរៀនសរសេរអក្សរដំបូងដោយប្រើខ្មៅដៃ។" },
+                { word: "កាបូបស្ពាយ", phonetic: "[កា-បូប-ស្ពាយ]", pos: "នាម", level: "easy", def: "ថង់មានខ្សែសម្រាប់ស្ពាយដាក់សៀវភៅទៅសាលា។", example: "ប្អូនស្ពាយកាបូបរៀបចំសៀវភៅយ៉ាងមានរបៀបទៅរៀន។" },
+                { word: "កែវទឹក", phonetic: "[កែវ-ទឹក]", pos: "នាម", level: "easy", def: "កែវផ្ទុកទឹកសម្រាប់យកតាមខ្លួនផឹកពេលស្រេក។", example: "សិស្សយកកែវទឹកផ្ទាល់ខ្លួនទៅរៀនដើម្បីកាត់បន្ថយប្លាស្ទិក។" },
+                { word: "ប្រអប់ប៊ិច", phonetic: "[ប្រ-អប់-ប៊ិច]", pos: "នាម", level: "easy", def: "ប្រអប់តូចសម្រាប់ដាក់ប៊ិច បន្ទាត់ និងជ័រលុប។", example: "ខ្ញុំរៀបចំប៊ិចនិងខ្មៅដៃដាក់ក្នុងប្រអប់ប៊ិចយ៉ាងស្អាត។" },
+                { word: "កន្ត្រៃ", phonetic: "[កន់-ត្រៃ]", pos: "នាម", level: "easy", def: "ឧបករណ៍ដែកមានមុខពីរសម្រាប់កាត់ក្រដាស។", example: "សិស្សប្រើកន្ត្រៃកាត់ក្រដាសពណ៌ធ្វើជារូបផ្កា។" },
+                { word: "កាវបិទ", phonetic: "[កាវ-បិទ]", pos: "នាម", level: "easy", def: "ជាតិស្អិតសម្រាប់បិទក្រដាស ឬរូបភាពភ្ជាប់គ្នា។", example: "យើងប្រើកាវបិទរូបគំនូរលើក្រដាសកាតុងរឹង។" },
+                { word: "ក្រដាសពណ៌", phonetic: "[ក្រ-ដាស-ពណ៌]", pos: "នាម", level: "easy", def: "ក្រដាសមានពណ៌ចម្រុះសម្រាប់បត់រូប និងសិប្បកម្ម។", example: "កុមារចូលចិត្តបត់ក្រដាសពណ៌ជារូបសត្វស្លាបនិងទូក។" },
+                { word: "ក្តារឆ្នួន", phonetic: "[ក្តា-ឆ្នួន]", pos: "នាម", level: "easy", def: "ក្តារតូចសម្រាប់សិស្សហាត់សរសេរអក្សរពីបុរាណ។", example: "កាលពីដើមសិស្សប្រើក្តារឆ្នួនហាត់សរសេរអក្សរខ្មែរ។" },
+                { word: "ដីស", phonetic: "[ដី-ស]", pos: "នាម", level: "easy", def: "ដុំម្សៅសសម្រាប់សរសេរលើក្តារខៀនក្នុងថ្នាក់។", example: "លោកគ្រូកាន់ដីសសរសេរមេរៀនយ៉ាងក្បោះក្បាយ។" },
+                { word: "កណ្តឹង", phonetic: "[កន់-ដឹង]", pos: "នាម", level: "easy", def: "ឧបករណ៍បន្លឺសម្លេងរោទ៍ប្រាប់ម៉ោងចូលរៀននិងចេញលេង។", example: "សម្លេងកណ្តឹងរោទ៍ឡើងប្រាប់ថាម៉ោងចូលរៀនបានមកដល់។" },
+                { word: "ទង់ជាតិ", phonetic: "[ទង់-ជាតិ]", pos: "នាម", level: "easy", def: "ទង់តំណាងប្រទេសជាតិដែលមានរូបប្រាសាទអង្គរវត្ត។", example: "សិស្សានុសិស្សឈរត្រង់ជួរគោរពទង់ជាតិនាពេលព្រឹក។" },
+                { word: "ចម្រៀងជាតិ", phonetic: "[ចំ-រៀង-ជាតិ]", pos: "នាម", level: "easy", def: "បទចម្រៀងនគររាជដែលជាបទចម្រៀងផ្លូវការរបស់កម្ពុជា។", example: "យើងច្រៀងបទចម្រៀងជាតិនគររាជដោយមោទនភាពខ្ពស់។" },
+                { word: "ទីធ្លាសាលា", phonetic: "[ទី-ធ្លា-សា-លា]", pos: "នាម", level: "easy", def: "ដីវាលមុខសាលារៀនសម្រាប់សិស្សរត់លេងកម្សាន្ត។", example: "ទីធ្លាសាលារៀនមានដើមឈើត្រឈឹងត្រឈៃផ្តល់ម្លប់ត្រជាក់។" },
+                // មធ្យម (១៦ ពាក្យ)
+                { word: "ការសន្សំសំចៃ", phonetic: "[ការ-សន់-សំ-សំ-ចៃ]", pos: "នាម", level: "medium", def: "ការចេះទុកដាក់ប្រាក់កាសនិងរបស់របរមិនខ្ជះខ្ជាយ។", example: "ការសន្សំសំចៃជាទម្លាប់ល្អដែលនាំឱ្យជីវិតធូរធារ។" },
+                { word: "ការយោគយល់", phonetic: "[ការ-យោគ-យល់]", pos: "នាម", level: "medium", def: "ការចេះយល់ពីទុក្ខធុរៈនិងការលំបាករបស់អ្នកដទៃ។", example: "ការយោគយល់គ្នាជួយឱ្យការងារជាក្រុមទទួលបានជោគជ័យ។" },
+                { word: "ការអត់ធ្មត់", phonetic: "[ការ-អត់-ធ្មត់]", pos: "នាម", level: "medium", def: "ការចេះទប់ចិត្តមិនខឹងច្រឡោតចំពោះឧបសគ្គ។", example: "ការអត់ធ្មត់ជាគន្លឹះដ៏សំខាន់ក្នុងការសម្រេចការងារធំ។" },
+                { word: "ភាពស្មោះត្រង់", phonetic: "[ភាព-ស្មោះ-ត្រង់]", pos: "នាម", level: "medium", def: "គុណសម្បត្តិនៃការនិយាយនិងធ្វើតែការពិតជានិច្ច។", example: "ភាពស្មោះត្រង់ធ្វើឱ្យមនុស្សគ្រប់គ្នាស្រឡាញ់និងទុកចិត្ត។" },
+                { word: "ភាពឧស្សាហ៍", phonetic: "[ភាព-អ៊ុត-សា]", pos: "នាម", level: "medium", def: "ការខិតខំប្រឹងប្រែងធ្វើការងារដោយមិនរួញរា។", example: "ភាពឧស្សាហ៍ព្យាយាមតែងតែនាំមកនូវជោគជ័យក្នុងជីវិត។" },
+                { word: "ភាពក្លាហាន", phonetic: "[ភាព-ក្លា-ហាន]", pos: "នាម", level: "medium", def: "ការមិនខ្លាចញញើតក្នុងការធ្វើអំពើត្រឹមត្រូវ។", example: "សិស្សបង្ហាញភាពក្លាហានក្នុងការឡើងបកស្រាយមេរៀន។" },
+                { word: "ការចេះជួយគ្នា", phonetic: "[ការ-ចេះ-ជួយ-គ្នា]", pos: "នាម", level: "medium", def: "ការជួយយកអាសាមិត្តភក្តិពេលជួបការលំបាក។", example: "ការចេះជួយគ្នាក្នុងថ្នាក់រៀនបង្កើតនូវមិត្តភាពជិតស្និទ្ធ។" },
+                { word: "ការគោរពចាស់ទុំ", phonetic: "[ការ-គោ-រប់-ចាស់-ទុំ]", pos: "នាម", level: "medium", def: "ការដឹងគុណនិងឱនលំទោនចំពោះអ្នកមានវ័យចាស់ជាង។", example: "ការគោរពចាស់ទុំជាគុណធម៌ដ៏ប្រពៃនៃកុលបុត្រខ្មែរ។" },
+                { word: "ការថែរក្សាអនាម័យ", phonetic: "[ការ-ថែ-រក-សា-អៈ-ណា-ម៉ី]", pos: "នាម", level: "medium", def: "ការលាងដៃនិងសម្អាតខ្លួនប្រាណដើម្បីសុខភាពល្អ។", example: "ការថែរក្សាអនាម័យជួយការពារជំងឺឆ្លងផ្សេងៗបានយ៉ាងល្អ។" },
+                { word: "ការដាំដើមឈើ", phonetic: "[ការ-ដាំ-ដើម-ឈើ]", pos: "នាម", level: "medium", def: "ការដាំកូនឈើបន្ថែមដើម្បីបង្កើនគម្របបៃតង។", example: "ការដាំដើមឈើជួយកាត់បន្ថយកម្តៅនិងផ្តល់ខ្យល់អាកាសល្អ។" },
+                { word: "ការមិនបោះសំរាម", phonetic: "[ការ-មិន-បោះ-សំ-រាម]", pos: "នាម", level: "medium", def: "ការទុកដាក់កាកសំណល់ក្នុងធុងសំរាមត្រឹមត្រូវ។", example: "ការមិនបោះសំរាមពាសវាលពាសកាលធ្វើឱ្យភូមិឋានស្អាតបាត។" },
+                { word: "ការសន្សំទឹកភ្លើង", phonetic: "[ការ-សន់-សំ-ទឹក-ភ្លើង]", pos: "នាម", level: "medium", def: "ការបិទក្បាលរ៉ូប៊ីណេនិងភ្លើងពេលឈប់ប្រើប្រាស់។", example: "ការសន្សំទឹកភ្លើងជួយកាត់បន្ថយការចំណាយក្នុងគ្រួសារ។" },
+                { word: "ការហាត់ប្រាណ", phonetic: "[ការ-ហាត់-ប្រាណ]", pos: "នាម", level: "medium", def: "ការធ្វើចលនារាងកាយរាល់ព្រឹកដើម្បីសុខភាពរឹងមាំ។", example: "ការហាត់ប្រាណទៀងទាត់ជួយឱ្យអារម្មណ៍ស្រស់ស្រាយជានិច្ច។" },
+                { word: "ការអានសៀវភៅរាល់ថ្ងៃ", phonetic: "[ការ-អាន-សៀវ-ភៅ-រាល់-ថ្ងៃ]", pos: "នាម", level: "medium", def: "ទម្លាប់ស្វែងរកចំណេះដឹងតាមរយៈការអានជាប្រចាំ។", example: "ការអានសៀវភៅរាល់ថ្ងៃជួយពង្រីកចំណេះដឹងទូទៅយ៉ាងទូលំទូលាយ។" },
+                { word: "ការសរសេរតាមអាន", phonetic: "[ការ-សរ-សេរ-តាម-អាន]", pos: "នាម", level: "medium", def: "ការហាត់ស្តាប់និងកត់ត្រាពាក្យឱ្យត្រូវតាមអក្ខរាវិរុទ្ធ។", example: "ការសរសេរតាមអានជួយពង្រឹងការសរសេរអក្សរខ្មែរឱ្យត្រឹមត្រូវ។" },
+                { word: "ការតែងល្បះ", phonetic: "[ការ-តែង-ល្បះ]", pos: "នាម", level: "medium", def: "ការផ្គុំពាក្យឱ្យក្លាយជាប្រយោគមានន័យស្តាប់បាន។", example: "សិស្សហាត់តែងល្បះដោយប្រើគុណនាមនិងកិរិយាសព្ទ។" },
+                // ពិបាក (១៦ ពាក្យ)
+                { word: "វចនានុក្រមខ្មែរ", phonetic: "[វ៉ាក់-ចាក់-ណា-នុ-ក្រម-ខ្មែរ]", pos: "នាម", level: "hard", def: "ក្បួនប្រមូលពាក្យខ្មែរដែលរៀបរៀងដោយសម្តេចជួនណាត។", example: "វចនានុក្រមខ្មែរជាឯកសារយោងដ៏ពិសិដ្ឋនៃអក្ខរាវិរុទ្ធជាតិ។" },
+                { word: "រដ្ឋធម្មនុញ្ញ", phonetic: "[រ័ត-ថាក់-ធ័ម-មាក់-នុញ]", pos: "នាម", level: "hard", def: "ច្បាប់កំពូលនៃព្រះរាជាណាចក្រកម្ពុជា។", example: "រដ្ឋធម្មនុញ្ញធានានូវសិទ្ធិសេរីភាពជាមូលដ្ឋានរបស់ប្រជាពលរដ្ឋ។" },
+                { word: "ព្រះបរមរាជវាំង", phonetic: "[ព្រះ-បៈ-រ៉ុម-រាជ-វាំង]", pos: "នាម", level: "hard", def: "ទីកន្លែងគង់នៅរបស់ព្រះមហាក្សត្រខ្មែរ។", example: "ព្រះបរមរាជវាំងនៅរាជធានីភ្នំពេញមានក្បាច់រចនាខ្មែរយ៉ាងល្អប្រណីត។" },
+                { word: "មហាសន្និបាត", phonetic: "[មៈ-ហា-សន់-និ-បាត]", pos: "នាម", level: "hard", def: "ការប្រជុំធំរបស់តំណាងស្ថាប័ន ឬអង្គការផ្សេងៗ។", example: "មហាសន្និបាតអង្គការសហប្រជាជាតិពិភាក្សាអំពីសន្តិភាពពិភពលោក។" },
+                { word: "កិច្ចសហប្រតិបត្តិការ", phonetic: "[កិច-សៈ-ហាក់-ប្រាក់-តិ-បាត់-តិ-កា]", pos: "នាម", level: "hard", def: "ការរួមដៃគ្នាបំពេញការងារឱ្យសម្រេចគោលដៅរួម។", example: "កិច្ចសហប្រតិបត្តិការរវាងប្រទេសក្នុងតំបន់ជួយជំរុញសេដ្ឋកិច្ច។" },
+                { word: "សន្តិភាវូបនីយកម្ម", phonetic: "[សន់-តិ-ភា-វូ-ប៉ាក់-នី-យាក់-ក័ម]", pos: "នាម", level: "hard", def: "ការធ្វើឱ្យមានសន្តិភាពពេញលេញក្នុងសង្គមជាតិ។", example: "នយោបាយឈ្នះឈ្នះបាននាំមកនូវសន្តិភាវូបនីយកម្មពេញលេញ។" },
+                { word: "គតិយុត្តិ", phonetic: "[គាក់-តិ-យុត]", pos: "នាម", level: "hard", def: "ភាពស្របច្បាប់ និងត្រឹមត្រូវតាមក្បួនច្បាប់រដ្ឋ។", example: "ឯកសារទាំងអស់ត្រូវមានលក្ខណៈគតិយុត្តិត្រឹមត្រូវតាមច្បាប់។" },
+                { word: "អភិបាលកិច្ច", phonetic: "[អាក់-ភិ-បាល-កិច]", pos: "នាម", level: "hard", def: "ការចាត់ចែង ដឹកនាំ និងគ្រប់គ្រងស្ថាប័ន ឬរដ្ឋ។", example: "ការពង្រឹងអភិបាលកិច្ចជួយកាត់បន្ថយអំពើពុករលួយក្នុងសង្គម។" },
+                { word: "គណនេយ្យភាព", phonetic: "[គាក់-ណាក់-នេយ-យ៉ាក់-ភាព]", pos: "នាម", level: "hard", def: "ការទទួលខុសត្រូវចំពោះមុខច្បាប់ និងប្រជាជន។", example: "តម្លាភាពនិងគណនេយ្យភាពជាសសរទ្រូងនៃស្ថាប័នរដ្ឋ។" },
+                { word: "គុណូបការៈ", phonetic: "[គុ-ណូ-ប៉ាក់-កា-រ៉ាក់]", pos: "នាម", level: "hard", def: "អំពើល្អ និងការជួយឧបត្ថម្ភដ៏ធំធេងដែលគេបានធ្វើ។", example: "យើងដឹងគុណូបការៈដ៏ធំធេងរបស់បុព្វបុរស។" },
+                { word: "ព្រហ្មវិហារធម៌", phonetic: "[ព្រុំ-មាក់-វិ-ហា-ធ័រ]", pos: "នាម", level: "hard", def: "ធម៌ដ៏ប្រសើរ ៤ យ៉ាង (មេត្តា ករុណា មុទិតា ឧបេក្ខា)។", example: "មនុស្សល្អតែងមានព្រហ្មវិហារធម៌ក្នុងចិត្តជានិច្ច។" },
+                { word: "អត្ថរស", phonetic: "[អ័ត-ថៈ-រស់]", pos: "នាម", level: "hard", def: "រសជាតិ ឬអារម្មណ៍រំភើបដែលកើតចេញពីអត្ថន័យកាព្យ។", example: "អត្ថរសនៃកំណាព្យធ្វើឱ្យអ្នកអានរំភើបញាប់ញ័រ។" },
+                { word: "សុខុដុមរមនា", phonetic: "[សុ-ខុ-ដុំ-រម-នា]", pos: "នាម", level: "hard", def: "ការរស់នៅចុះសម្រុង និងសប្បាយរីករាយជាមួយគ្នា។", example: "ការរស់នៅប្រកបដោយសុខុដុមរមនាក្នុងសហគមន៍។" },
+                { word: "គរុកោសល្យអប់រំ", phonetic: "[គុ-រុ-កោ-សល់-អប់-រំ]", pos: "នាម", level: "hard", def: "កលវិធីគរុកោសល្យទំនើបក្នុងការបង្ហាត់បង្រៀនសិស្ស។", example: "គ្រូប្រើគរុកោសល្យអប់រំទាក់ទាញសិស្សឱ្យចូលចិត្តកាព្យ។" },
+                { word: "ប្រាជ្ញាញាណ", phonetic: "[ប្រាច់-ញ៉ា-ញាន]", pos: "នាម", level: "hard", def: "ចំណេះដឹង និងការយល់ដឹងដ៏ជ្រៅជ្រះភ្លឺស្វាង។", example: "ប្រាជ្ញាញាណកើតចេញពីការឧស្សាហ៍សិក្សារៀនសូត្រ។" },
+                { word: "អភិវឌ្ឍន៍សង្គម", phonetic: "[អាក់-ភិ-វ័ត-សង់-គម]", pos: "នាម", level: "hard", def: "ការធ្វើឱ្យសង្គមជាតិមានការរីកចម្រើនគ្រប់វិស័យ។", example: "ចំណេះដឹងនិងសីលធម៌ជាកម្លាំងចលករនៃអភិវឌ្ឍន៍សង្គម។" }
+            ]
+        };
+
+        /* =====================================================================
+           3. 48-WORD VOCABULARY ENGINE (Grade 5 Khmer - Exactly 48 Words / Day)
+           - 16 Easy (ងាយ)
+           - 16 Medium (មធ្យម)
+           - 16 Hard (ពិបាក)
+           Total: Exactly 48 words per day
+           ===================================================================== */
+        const THEMATIC_VOCAB_BANK = {
+            easy: [
+                { word: "សាលារៀន", phonetic: "[សា-លា-រៀន]", pos: "នាម", def: "ទីកន្លែងសម្រាប់ផ្តល់ការអប់រំ និងបង្រៀនចំណេះដឹងដល់សិស្សានុសិស្ស។", example: "សាលារៀនរបស់ខ្ញុំមានដើមឈើធំៗ និងទីធ្លាស្រស់ស្អាត។" },
+                { word: "គ្រូបង្រៀន", phonetic: "[គ្រូ-បង-រៀន]", pos: "នាម", def: "អ្នកបង្ហាត់បង្រៀន និងអប់រំផ្ទេរចំណេះវិជ្ជាដល់សិស្ស។", example: "លោកគ្រូអ្នកគ្រូខិតខំបង្រៀនយើងដោយក្តីស្រឡាញ់។" },
+                { word: "មិត្តភក្តិ", phonetic: "[មិត-ភាក់]", pos: "នាម", def: "មិត្តសម្លាញ់ អ្នករាប់អានគ្នាជិតស្និទ្ធ។", example: "ខ្ញុំនិងមិត្តភក្តិតែងតែជួយគ្នារៀនសូត្រក្នុងថ្នាក់។" },
+                { word: "ក្តារខៀន", phonetic: "[ក្តា-ខៀន]", pos: "នាម", def: "ក្តារពណ៌ខៀវ ឬខ្មៅសម្រាប់សរសេរពន្យល់សិស្សក្នុងថ្នាក់។", example: "លោកគ្រូសរសេរចំណងជើងមេរៀនលើក្តារខៀនយ៉ាងស្អាត។" },
+                { word: "ថ្នាក់រៀន", phonetic: "[ថ្នាក់-រៀន]", pos: "នាម", def: "បន្ទប់រៀនដែលមានតុ កៅអី និងក្តារខៀន។", example: "ថ្នាក់រៀនរបស់យើងមានពន្លឺគ្រប់គ្រាន់ និងមានរបៀបរៀបរយ។" },
+                { word: "ផ្កាឈូក", phonetic: "[ផ្កា-ឈូក]", pos: "នាម", def: "ឈ្មោះផ្កាដុះក្នុងទឹក មានពណ៌ស ឬក្រហម ជានិមិត្តរូបនៃភាពបរិសុទ្ធ។", example: "ស្រះទឹកខាងមុខសាលារីកផ្កាឈូកពណ៌ផ្កាឈូកយ៉ាងស្រស់បំព្រង។" },
+                { word: "ស្រែចំការ", phonetic: "[ស្រែ-ចំ-កា]", pos: "នាម", def: "ដីសម្រាប់ធ្វើស្រូវ និងដាំដំណាំផ្សេងៗ។", example: "នៅរដូវវស្សា ស្រែចំការមើលទៅខៀវស្រងាត់គួរជាទីគយគន់។" },
+                { word: "ដើមឈើ", phonetic: "[ដើម-ឈើ]", pos: "នាម", def: "រុក្ខជាតិមានដើម មានមែក និងស្លឹកផ្តល់ម្លប់ត្រជាក់។", example: "សិស្សានុសិស្សនាំគ្នាស្រោចទឹកដើមឈើក្នុងបរិវេណសាលា។" },
+                { word: "ផ្ទះសម្បែង", phonetic: "[ផ្ទះ-សំបែង]", pos: "នាម", def: "កន្លែងសម្រាប់រស់នៅប្រចាំថ្ងៃរបស់ក្រុមគ្រួសារ។", example: "យើងត្រូវរួមគ្នាថែរក្សាផ្ទះសម្បែងឱ្យមានអនាម័យជានិច្ច។" },
+                { word: "សម្លៀកបំពាក់", phonetic: "[សម្លៀក-បំពាក់]", pos: "នាម", def: "ខោ អាវ សម្រាប់ស្លៀកពាក់បិទបាំងរាងកាយ។", example: "សិស្សត្រូវស្លៀកពាក់ឯកសណ្ឋានឱ្យបានត្រឹមត្រូវ និងស្អាតបាត។" },
+                { word: "សួនផ្កា", phonetic: "[សួន-ផ្កា]", pos: "នាម", def: "កន្លែងដាំផ្កាចម្រុះពណ៌សម្រាប់លម្អ និងកម្សាន្ត។", example: "សួនផ្កាក្នុងសាលារៀនបញ្ចេញក្លិនក្រអូបឈ្ងុយឈ្ងប់។" },
+                { word: "ប៊ិចសរសេរ", phonetic: "[ប៊ិច-សរ-សេរ]", pos: "នាម", def: "ឧបករណ៍ប្រើទឹកថ្នាំសម្រាប់កត់ត្រាអក្សរលើក្រដាស។", example: "ខ្ញុំប្រើប៊ិចពណ៌ខៀវដើម្បីសរសេរមេរៀនឱ្យបានស្អាត។" },
+                { word: "ផ្លែឈើ", phonetic: "[ផ្លែ-ឈើ]", pos: "នាម", def: "ផលដែលកើតចេញពីផ្កានៃដើមឈើសម្រាប់បរិភោគ។", example: "ផ្លែឈើស្រស់ៗផ្តល់នូវជីវជាតិយ៉ាងច្រើនដល់សុខភាព។" },
+                { word: "ទង់ជ័យ", phonetic: "[ទង់-ជ័យ]", pos: "នាម", def: "ទង់តំណាងជ័យជម្នះ និងមោទនភាពជាតិ។", example: "កីឡាករលើកទង់ជ័យឡើងក្រោយទទួលបានមេដាយមាស។" },
+                { word: "កូនសិស្ស", phonetic: "[កូន-សិស]", pos: "នាម", def: "កុមារដែលកំពុងសិក្សារៀនសូត្រក្នុងសាលា។", example: "កូនសិស្សទាំងអស់គោរពស្រឡាញ់លោកគ្រូអ្នកគ្រូ។" },
+                { word: "មែកឈើ", phonetic: "[មែក-ឈើ]", pos: "នាម", def: "ផ្នែកបែកចេញពីដើមឈើធំសម្រាប់បក្សីទំ។", example: "សត្វបក្សីនាំគ្នាធ្វើសំបុកលើមែកឈើត្រឈឹងត្រឈៃ។" }
+            ],
+            medium: [
+                { word: "ការអានសៀវភៅ", phonetic: "[ការ-អាន-សៀវ-ភៅ]", pos: "នាម", def: "ទម្លាប់អានសៀវភៅដើម្បីបង្កើនចំណេះដឹង។", example: "ការអានសៀវភៅរាល់ថ្ងៃជួយពង្រីកការគិត និងការចងចាំ។" },
+                { word: "កិច្ចការផ្ទះ", phonetic: "[កិច-កា-ផ្ទះ]", pos: "នាម", def: "មេរៀន ឬលំហាត់ដែលគ្រូដាក់ឱ្យសិស្សធ្វើនៅផ្ទះ។", example: "ខ្ញុំតែងតែធ្វើកិច្ចការផ្ទះឱ្យចប់មុនពេលចូលគេង។" },
+                { word: "រុក្ខជាតិ", phonetic: "[រុក-ខៈ-ជាតិ]", pos: "នាម", def: "តិណជាតិ ដើមឈើ ស្មៅ ដំណាំគ្រប់ប្រភេទ។", example: "រុក្ខជាតិផ្តល់នូវម្លប់ត្រជាក់ និងអុកស៊ីសែនដល់មនុស្ស។" },
+                { word: "ត្រីត្រាញ់", phonetic: "[ត្រី-ត្រាញ់]", pos: "នាម", def: "ឈ្មោះត្រីទឹកសាបមួយប្រភេទដែលមានរាងសំប៉ែត។", example: "អ្នកនេសាទចាប់បានត្រីត្រាញ់ជាច្រើននៅក្នុងបឹង។" },
+                { word: "ប្រាសាទបុរាណ", phonetic: "[ប្រា-សាត-បុ-រាន]", pos: "នាម", def: "សំណង់ថ្មដ៏ល្អប្រណីតដែលបុព្វបុរសខ្មែរបានកសាងទុក។", example: "ប្រាសាទអង្គរវត្តជាសម្បត្តិបេតិកភណ្ឌពិភពលោកដ៏ល្បីល្បាញ។" },
+                { word: "កីឡាដើម្បីសុខភាព", phonetic: "[កី-ឡា-ដើម-បី-សុខ-ខៈ-ភាព]", pos: "នាម", def: "ការលេងកីឡាដើម្បីពង្រឹងរាងកាយនិងស្មារតី។", example: "ការលេងកីឡាដើម្បីសុខភាពជួយឱ្យយើងមានកាយសម្បទារឹងមាំ។" },
+                { word: "ការគោរពវិន័យ", phonetic: "[ការ-គោ-រប់-វិ-ណ័យ]", pos: "នាម", def: "ការអនុវត្តតាមច្បាប់ទម្លាប់របស់សាលាបានខ្ជាប់ខ្ជួន។", example: "ការគោរពវិន័យជាគុណសម្បត្តិដ៏ប្រសើររបស់សិស្សល្អ។" },
+                { word: "ការសន្សំសំចៃពេល", phonetic: "[ការ-សន់-សំ-សំ-ចៃ-ពេល]", pos: "នាម", def: "ការប្រើប្រាស់ពេលវេលាឱ្យមានប្រយោជន៍ជាអតិបរមា។", example: "ការសន្សំសំចៃពេលជួយឱ្យយើងធ្វើកិច្ចការបានសម្រេចច្រើន។" },
+                { word: "ការការពារព្រៃឈើ", phonetic: "[ការ-កា-ពារ-ព្រៃ-ឈើ]", pos: "នាម", def: "ការថែរក្សាព្រៃឈើកុំឱ្យមានការកាប់បំផ្លាញ។", example: "ការការពារព្រៃឈើជាកាតព្វកិច្ចរបស់ពលរដ្ឋគ្រប់រូប។" },
+                { word: "សិប្បកម្មតម្បាញ", phonetic: "[សិប-ប៉ាក់-ក័ម-តំ-បាញ]", pos: "នាម", def: "របរត្បាញហូលផាមួង និងក្រមាដោយដៃ។", example: "សិប្បកម្មតម្បាញខ្មែរទទួលបានការកោតសរសើរពីអន្តរជាតិ។" },
+                { word: "ជីវភាពអ្នកស្រែ", phonetic: "[ជី-វ៉ាក់-ភាព-អ្នក-ស្រែ]", pos: "នាម", def: "ការរស់នៅប្រចាំថ្ងៃរបស់កសិករខ្មែរ។", example: "ជីវភាពអ្នកស្រែពោរពេញដោយភាពស្មោះត្រង់និងឧស្សាហ៍។" },
+                { word: "សុវត្ថិភាពចរាចរណ៍", phonetic: "[សុ-វ៉ាត់-ថិ-ភាព-ច-រ៉ា-ច]", pos: "នាម", def: "ការបើកបរដោយប្រុងប្រយ័ត្នដើម្បីកុំឱ្យមានគ្រោះថ្នាក់។", example: "យើងត្រូវពាក់មួកសុវត្ថិភាពដើម្បីសុវត្ថិភាពចរាចរណ៍។" },
+                { word: "ការងារជាក្រុម", phonetic: "[ការ-ងារ-ជា-ក្រុម]", pos: "នាម", def: "ការសហការគ្នាធ្វើការងារឱ្យសម្រេចគោលដៅ។", example: "ការងារជាក្រុមជួយបង្កើនគំនិតច្នៃប្រឌិត និងភាពសាមគ្គី។" },
+                { word: "សេចក្តីស្ងប់ក្នុងចិត្ត", phonetic: "[សេច-ក្ដី-ស្ងប់-ក្នុង-ចិត]", pos: "នាម", def: "ភាពនឹងធឹង គ្មានភាពជ្រួលច្របល់ក្នុងចិត្ត។", example: "ការតាំងសមាធិនាំមកនូវសេចក្តីស្ងប់ក្នុងចិត្ត។" },
+                { word: "ការចេះអត់ឱន", phonetic: "[ការ-ចេះ-អត់-អោន]", pos: "នាម", def: "ការមិនប្រកាន់ទោសពៃរ៍ចំពោះកំហុសមិត្តភក្តិ។", example: "ការចេះអត់ឱនជួយកាត់បន្ថយជម្លោះក្នុងថ្នាក់រៀន។" },
+                { word: "ភាពម្ចាស់ការ", phonetic: "[ភាព-ម្ចាស់-ការ]", pos: "នាម", def: "ការចេះទទួលខុសត្រូវលើការងាររបស់ខ្លួនដោយឯករាជ្យ។", example: "សិស្សពូកែតែងមានភាពម្ចាស់ការលើការរៀនសូត្រ។" }
+            ],
+            hard: [
+                { word: "ស្វ័យសិក្សា", phonetic: "[ស្វៃ-សិក-សា]", pos: "នាម", def: "ការរៀនសូត្រដោយខ្លួនឯងតាមរយៈការអាន និងស្រាវជ្រាវ។", example: "ស្វ័យសិក្សាជួយបណ្តុះទម្លាប់ស្រាវជ្រាវ និងពង្រីកពុទ្ធិចំណេះដឹង។" },
+                { word: "ធនធានធម្មជាតិ", phonetic: "[ធន់-ធាន-ធ័រ-មៈ-ជាតិ]", pos: "នាម", def: "ទ្រព្យសម្បត្តិដែលមានស្រាប់ក្នុងធម្មជាតិ ដូចជាព្រៃឈើ និងរ៉ែ។", example: "យើងត្រូវរួមគ្នាការពារធនធានធម្មជាតិកុំឱ្យបាត់បង់។" },
+                { word: "បរិស្ថានស្អាត", phonetic: "[បៈ-រិ-ស្ថាន-ស្អាត]", pos: "នាម", def: "ស្ថានភាពជុំវិញខ្លួនដែលគ្មានសំរាម និងគ្មានការបំពុល។", example: "ការមិនបោះសំរាមពាសវាលពាសកាលជួយថែរក្សាបរិស្ថានឱ្យស្រស់ស្អាត។" },
+                { word: "សហប្រតិបត្តិការ", phonetic: "[សៈ-ហៈ-ប្រៈ-តិ-បាត់-តិ-កា]", pos: "នាម", def: "ការធ្វើការរួមគ្នាដោយស្មោះត្រង់ដើម្បីសម្រេចគោលដៅតែមួយ។", example: "សហប្រតិបត្តិការល្អរវាងមិត្តភក្តិធ្វើឱ្យលទ្ធផលការងារក្រុមទទួលបានពិន្ទុខ្ពស់។" },
+                { word: "ទូរគមនាគមន៍ជាតិ", phonetic: "[ទូ-រ៉ាក់-គម-មាក់-នា-គម-ជាតិ]", pos: "នាម", def: "បណ្តាញទូរគមនាគមន៍គ្របដណ្តប់ទូទាំងប្រទេស។", example: "ទូរគមនាគមន៍ជាតិជួយពន្លឿនការអភិវឌ្ឍសេដ្ឋកិច្ចឌីជីថល។" },
+                { word: "ផលិតផលជាតិ", phonetic: "[ផៈ-លិត-តាក់-ផល់-ជាតិ]", pos: "នាម", def: "ទំនិញដែលផលិតដោយកូនខ្មែរក្នុងប្រទេស។", example: "ការគាំទ្រផលិតផលជាតិជួយឱ្យសេដ្ឋកិច្ចកម្ពុជារឹងមាំ។" },
+                { word: "ការគ្រប់គ្រងពេលវេលា", phonetic: "[ការ-គ្រប-គ្រង-ពេល-វេ-លា]", pos: "នាម", def: "ការរៀបចំកាលវិភាគការងារឱ្យមានប្រសិទ្ធភាព។", example: "ការគ្រប់គ្រងពេលវេលាបានល្អជាគន្លឹះនៃភាពជោគជ័យ។" },
+                { word: "នវានុវត្តន៍អប់រំ", phonetic: "[នាក់-វ៉ា-នុ-វ៉ាត់-អប់-រំ]", pos: "នាម", def: "ការច្នៃប្រឌិតវិធីសាស្ត្រថ្មីៗក្នុងការបង្រៀននិងរៀន។", example: "នវានុវត្តន៍អប់រំជួយឱ្យសិស្សឆាប់យល់មេរៀនវិទ្យាសាស្ត្រ។" },
+                { word: "ការអភិរក្សធនធានទឹក", phonetic: "[ការ-អាក់-ភិ-រ៉ាក់-ធន់-ធាន-ទឹក]", pos: "នាម", def: "ការថែរក្សាប្រភពទឹកស្អាតទន្លេបឹងបួរកុំឱ្យរីងស្ងួត។", example: "ការអភិរក្សធនធានទឹកធានាការផ្គត់ផ្គង់ដល់ការរស់នៅ។" },
+                { word: "បូរណភាពដែនដី", phonetic: "[បូ-រ៉ាក់-ណៈ-ភាព-ដែន-ដី]", pos: "នាម", def: "ភាពគង់វង្សនៃទឹកដីដោយគ្មានការឈ្លានពាន។", example: "កងទ័ពឈរជើងការពារបូរណភាពដែនដីដោយអង់អាច។" },
+                { word: "សន្តិសុខស្បៀង", phonetic: "[សន់-តិ-សុខ-ស្បៀង]", pos: "នាម", def: "ការមានស្បៀងអាហារគ្រប់គ្រាន់ និងមានជីវជាតិសម្រាប់ពលរដ្ឋ។", example: "វិស័យកសិកម្មរឹងមាំធានាសន្តិសុខស្បៀងជាតិ។" },
+                { word: "កាតព្វកិច្ចពលរដ្ឋ", phonetic: "[កា-តាប់-ព្វាក់-កិច-ពន់-លាក់-រ័ត]", pos: "នាម", def: "ភារកិច្ចដែលពលរដ្ឋគ្រប់រូបត្រូវចូលរួមបម្រើជាតិ។", example: "ការចូលរៀនសូត្រជាកាតព្វកិច្ចពលរដ្ឋវ័យក្មេង។" },
+                { word: "សច្ចធម៌ប្រវត្តិសាស្ត្រ", phonetic: "[សាច់-ចៈ-ធ័រ-ប្រ-វ័ត-តិ-សាស]", pos: "នាម", def: "ការពិតជាក់ស្តែងដែលបានចារទុកក្នុងប្រវត្តិសាស្ត្រ។", example: "សិលាចារឹកជាភស្តុតាងនៃសច្ចធម៌ប្រវត្តិសាស្ត្រខ្មែរ។" },
+                { word: "អភិបាលកិច្ចប្រជាធិបតេយ្យ", phonetic: "[អាក់-ភិ-បាល-កិច-ប្រ-ជា-ធិប-ប៉ៈ-តៃ]", pos: "នាម", def: "ការដឹកនាំរដ្ឋដោយគោរពសិទ្ធិ និងផលប្រយោជន៍ប្រជាជន។", example: "អភិបាលកិច្ចប្រជាធិបតេយ្យនាំមកនូវស្ថិរភាពយូរអង្វែង។" },
+                { word: "ស្មារតីស្នេហាជាតិមាតុភូមិ", phonetic: "[ស្មា-រ៉ាក់-តី-ស្នេ-ហា-ជាតិ-មា-តុ-ភូម]", pos: "នាម", def: "ទឹកចិត្តលះបង់គ្រប់បែបយ៉ាងដើម្បីភាពរុងរឿងនៃមាតុភូមិ។", example: "យុវជនគំរូតែងប្រកាន់ខ្ជាប់នូវស្មារតីស្នេហាជាតិមាតុភូមិ។" },
+                { word: "ការអភិវឌ្ឍប្រកបដោយចីរភាព", phonetic: "[ការ-អាក់-ភិ-វ័ត-ប្រ-កប-ដោយ-ជី-រ៉ាក់-ភាព]", pos: "នាម", def: "ការរីកចម្រើនដែលគិតគូរដល់បរិស្ថាននិងមនុស្សជំនាន់ក្រោយ។", example: "ការអភិវឌ្ឍប្រកបដោយចីរភាពជាគោលដៅចម្បងរបស់ជាតិយើង។" }
+            ]
+        };
+
+        function getWordsForDay(dayNum) {
+            const key = "day_" + dayNum;
+            // 1. Direct match in VOCABULARY_DATA (Days 1 to 6 - exactly 48 words each, 288 unique words total)
+            if (VOCABULARY_DATA[key] && VOCABULARY_DATA[key].length === 48) {
+                return VOCABULARY_DATA[key];
+            }
+            if (VOCABULARY_DATA[dayNum] && VOCABULARY_DATA[dayNum].length === 48) {
+                return VOCABULARY_DATA[dayNum];
+            }
+
+            // 2. Deterministic generator for subsequent days (Guarantee exactly 48 items: 16 easy, 16 medium, 16 hard)
+            return generateThematicDayWords(dayNum);
+        }
+
+        function generateThematicDayWords(dayNum) {
+            const dayOffset = (dayNum - 1) % 16;
+            const weekIndex = Math.floor((dayNum - 1) / 6);
+            const weekObj = ACADEMIC_WEEKS_DATA[weekIndex] || { title: `មេរៀនទី ${Math.ceil(dayNum / 6)}` };
+
+            const easyWords = [];
+            for (let i = 0; i < 16; i++) {
+                const item = THEMATIC_VOCAB_BANK.easy[(i + dayOffset) % THEMATIC_VOCAB_BANK.easy.length];
+                easyWords.push({
+                    word: item.word,
+                    phonetic: item.phonetic,
+                    pos: item.pos,
+                    level: "easy",
+                    def: item.def,
+                    example: item.example
+                });
+            }
+
+            const mediumWords = [];
+            for (let i = 0; i < 16; i++) {
+                const item = THEMATIC_VOCAB_BANK.medium[(i + dayOffset) % THEMATIC_VOCAB_BANK.medium.length];
+                mediumWords.push({
+                    word: item.word,
+                    phonetic: item.phonetic,
+                    pos: item.pos,
+                    level: "medium",
+                    def: item.def,
+                    example: item.example
+                });
+            }
+
+            const hardWords = [];
+            for (let i = 0; i < 16; i++) {
+                const item = THEMATIC_VOCAB_BANK.hard[(i + dayOffset) % THEMATIC_VOCAB_BANK.hard.length];
+                hardWords.push({
+                    word: item.word,
+                    phonetic: item.phonetic,
+                    pos: item.pos,
+                    level: "hard",
+                    def: item.def,
+                    example: item.example
+                });
+            }
+
+            return [...easyWords, ...mediumWords, ...hardWords];
+        }
+
+        /* =====================================================================
+           4. AUDIO SYNTHESIZER (Web Audio API Sound Effects)
+           ===================================================================== */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type, duration, gainVal = 0.1) {
+            try {
+                if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio not supported or blocked");
+            }
+        }
+
+        function playFlipSound() {
+            playTone(450, 'sine', 0.12, 0.15);
+        }
+
+        function playSuccessSound() {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const now = audioCtx.currentTime;
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                setTimeout(() => playTone(freq, 'triangle', 0.35, 0.15), idx * 100);
+            });
+        }
+
+        function playChimeSound() {
+            playTone(880, 'sine', 0.25, 0.12);
+        }
+
+        /* Multi-Tier Khmer Pronunciation Audio Player (Optimized for iPad / Safari & Netlify) */
+        let currentAudioObj = null;
+
+        function playKhmerAudio(text) {
+            if (!text) return;
+            const btn = document.getElementById('btnSoundPlay');
+            if (btn) btn.classList.add('speaking');
+
+            // 1. Primary: Google Translate Khmer TTS Audio Proxy URL (client=tw-ob)
+            const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=km&client=tw-ob&q=${encodeURIComponent(text)}`;
+
+            let audio = document.getElementById('khmerAudioPlayer');
+            if (!audio) {
+                audio = new Audio();
+                audio.id = 'khmerAudioPlayer';
+                document.body.appendChild(audio);
+            }
+
+            audio.pause();
+            audio.src = audioUrl;
+            audio.load();
+
+            audio.onended = () => {
+                if (btn) btn.classList.remove('speaking');
+            };
+
+            audio.onerror = () => {
+                console.log("Primary TTS audio error, attempting fallback client=gtx");
+                const fallbackAudio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=km&client=gtx&q=${encodeURIComponent(text)}`);
+                fallbackAudio.onended = () => { if (btn) btn.classList.remove('speaking'); };
+                fallbackAudio.onerror = () => {
+                    // Fallback to Web Speech API
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'km-KH';
+                        utterance.rate = 0.85;
+                        utterance.onend = () => { if (btn) btn.classList.remove('speaking'); };
+                        utterance.onerror = () => { if (btn) btn.classList.remove('speaking'); };
+                        window.speechSynthesis.speak(utterance);
+                    } else {
+                        if (btn) btn.classList.remove('speaking');
+                        showToast("ឧបករណ៍មិនទាន់គាំទ្រសំឡេងអានខ្មែរនៅឡើយទេ");
+                    }
+                };
+                fallbackAudio.play().catch(e => {
+                    console.log("Fallback audio error:", e);
+                    if (btn) btn.classList.remove('speaking');
+                });
+            };
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    console.log("Audio playback error:", e);
+                    if (audio.onerror) audio.onerror(e);
+                });
+            }
+        }
+
+        function playCurrentWordAudio() {
+            const wordObj = filteredWords[currentIndex];
+            if (!wordObj) return;
+            playKhmerAudio(wordObj.word);
+        }
+
+        /* =====================================================================
+           5. APP STATE & CORE LOGIC
+           ===================================================================== */
+        let currentWeek = 1;
+        let currentDay = 1;
+        let currentDifficulty = 'all'; // all, easy, medium, hard
+        let rawDayWords = [];
+        let filteredWords = [];
+        let currentIndex = 0;
+        let isCardFlipped = false;
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let remainingTimer = 0;
+        let learnedCardsSet = new Set();
+
+        // DOM Elements
+        const weekSelect = document.getElementById('weekSelect');
+        const daySelect = document.getElementById('daySelect');
+        const badgeCurrentWeek = document.getElementById('badgeCurrentWeek');
+        const cardScene = document.getElementById('cardScene');
+        const cardBackFace = document.getElementById('cardBackFace');
+        const cardFrontFace = document.getElementById('cardFrontFace');
+        const cardWordText = document.getElementById('cardWordText');
+        const cardPhoneticText = document.getElementById('cardPhoneticText');
+        const cardPosText = document.getElementById('cardPosText');
+        const cardLevelBadge = document.getElementById('cardLevelBadge');
+        const cardDefText = document.getElementById('cardDefText');
+        const cardExampleText = document.getElementById('cardExampleText');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressCountText = document.getElementById('progressCountText');
+        const learnedCountText = document.getElementById('learnedCountText');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerStatusLabel = document.getElementById('timerStatusLabel');
+        const toastMsg = document.getElementById('toastMsg');
+        const completionModal = document.getElementById('completionModal');
+        const dashboardSidebar = document.getElementById('dashboardSidebar');
+        const sidebarToggleText = document.getElementById('sidebarToggleText');
+
+        // Init function
+        function initApp() {
+            populateWeekDropdown();
+            loadDay(1);
+            initParticles();
+            setupKeyboardShortcuts();
+        }
+
+        function populateWeekDropdown() {
+            weekSelect.innerHTML = "";
+            ACADEMIC_WEEKS_DATA.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.week;
+                opt.textContent = `សប្តាហ៍ទី ${toKhmerNum(item.week)} (${item.title})`;
+                weekSelect.appendChild(opt);
+            });
+            updateDayDropdown(1);
+        }
+
+        function updateDayDropdown(weekNum) {
+            const weekObj = ACADEMIC_WEEKS_DATA.find(w => w.week === weekNum) || ACADEMIC_WEEKS_DATA[0];
+            daySelect.innerHTML = "";
+            weekObj.days.forEach((day, index) => {
+                const opt = document.createElement('option');
+                opt.value = day;
+                opt.textContent = `ថ្ងៃទី ${toKhmerNum(index + 1)}`;
+                daySelect.appendChild(opt);
+            });
+            badgeCurrentWeek.textContent = `សប្តាហ៍ទី${toKhmerNum(weekNum)}`;
+        }
+
+        function onWeekChange() {
+            const w = parseInt(weekSelect.value);
+            currentWeek = w;
+            updateDayDropdown(w);
+            const firstDay = parseInt(daySelect.value);
+            loadDay(firstDay);
+        }
+
+        function onDayChange() {
+            const d = parseInt(daySelect.value);
+            loadDay(d);
+        }
+
+        function loadDay(dayNum) {
+            currentDay = dayNum;
+            rawDayWords = getWordsForDay(dayNum);
+            applyFilter();
+            currentIndex = 0;
+            learnedCardsSet.clear();
+            closeModal();
+            resetCardFaceDown();
+            renderCard();
+            updateProgress();
+            resetTimer();
+            showToast(`បានបញ្ចូលកាតសម្រាប់ថ្ងៃទី ${toKhmerNum(dayNum)}!`);
+        }
+
+        function applyFilter() {
+            if (currentDifficulty === 'all') {
+                filteredWords = [...rawDayWords];
+            } else {
+                filteredWords = rawDayWords.filter(w => w.level === currentDifficulty);
+                if (filteredWords.length === 0) {
+                    showToast("គ្មានពាក្យក្នុងកម្រិតនេះទេ ប្តូរមកទាំងអស់!");
+                    currentDifficulty = 'all';
+                    updateFilterTabUI();
+                    filteredWords = [...rawDayWords];
+                }
+            }
+        }
+
+        function setDifficultyFilter(lvl) {
+            currentDifficulty = lvl;
+            updateFilterTabUI();
+            applyFilter();
+            currentIndex = 0;
+            resetCardFaceDown();
+            renderCard();
+            updateProgress();
+        }
+
+        function updateFilterTabUI() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.getAttribute('data-level') === currentDifficulty) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        /* Card Flip & Face Visibility Controller (Guaranteed zero-bleed on iPad/Safari) */
+        function updateCardFaceState(flipped, animated = true) {
+            const cardBack = document.getElementById('cardBackFace');
+            const cardFront = document.getElementById('cardFrontFace');
+            if (!cardBack || !cardFront) return;
+
+            if (flipped) {
+                cardScene.classList.add('is-flipped');
+                if (animated) {
+                    // Start flip animation: reveal front face immediately so it spins in,
+                    // and hide back face completely halfway through the rotation (260ms)
+                    cardFront.style.display = 'flex';
+                    cardFront.style.visibility = 'visible';
+                    setTimeout(() => {
+                        if (isCardFlipped) {
+                            cardBack.style.display = 'none';
+                            cardBack.style.visibility = 'hidden';
+                        }
+                    }, 260);
+                } else {
+                    cardBack.style.display = 'none';
+                    cardBack.style.visibility = 'hidden';
+                    cardFront.style.display = 'flex';
+                    cardFront.style.visibility = 'visible';
+                }
+            } else {
+                cardScene.classList.remove('is-flipped');
+                if (animated) {
+                    // Flip back to cover: display back face, and hide front face halfway through rotation
+                    cardBack.style.display = 'flex';
+                    cardBack.style.visibility = 'visible';
+                    setTimeout(() => {
+                        if (!isCardFlipped) {
+                            cardFront.style.display = 'none';
+                            cardFront.style.visibility = 'hidden';
+                        }
+                    }, 260);
+                } else {
+                    cardFront.style.display = 'none';
+                    cardFront.style.visibility = 'hidden';
+                    cardBack.style.display = 'flex';
+                    cardBack.style.visibility = 'visible';
+                }
+            }
+        }
+
+        function toggleCardFlip() {
+            isCardFlipped = !isCardFlipped;
+            updateCardFaceState(isCardFlipped, true);
+            playFlipSound();
+            if (isCardFlipped) {
+                learnedCardsSet.add(currentIndex);
+                updateProgress();
+            }
+        }
+
+        function resetCardFaceDown() {
+            isCardFlipped = false;
+            updateCardFaceState(false, false);
+        }
+
+        function renderCard() {
+            if (filteredWords.length === 0) return;
+            const item = filteredWords[currentIndex];
+
+            // Render Front
+            cardWordText.textContent = item.word;
+            cardPhoneticText.textContent = item.phonetic;
+            cardPosText.textContent = item.pos || "ពាក្យគន្លឹះ";
+            cardDefText.textContent = item.def;
+            cardExampleText.textContent = item.example ? `«${item.example}»` : "";
+
+            // Render Level Badge
+            cardLevelBadge.className = "badge-level";
+            if (item.level === 'easy') {
+                cardLevelBadge.classList.add('level-easy');
+                cardLevelBadge.textContent = "ងាយ";
+            } else if (item.level === 'medium') {
+                cardLevelBadge.classList.add('level-medium');
+                cardLevelBadge.textContent = "មធ្យម";
+            } else {
+                cardLevelBadge.classList.add('level-hard');
+                cardLevelBadge.textContent = "ពិបាក";
+            }
+
+            // Text colors: VIBRANT SOLID to avoid circumfix vowel cut-off
+            if (item.level === 'easy') {
+                cardWordText.style.color = "#059669"; // Emerald
+            } else if (item.level === 'medium') {
+                cardWordText.style.color = "#d97706"; // Amber
+            } else {
+                cardWordText.style.color = "#4f46e5"; // Indigo
+            }
+        }
+
+        /* Navigation Controls */
+        function nextCard() {
+            if (filteredWords.length === 0) return;
+            if (currentIndex < filteredWords.length - 1) {
+                currentIndex++;
+                resetCardFaceDown();
+                renderCard();
+                updateProgress();
+                resetTimer();
+                playChimeSound();
+            } else {
+                // Finished All Cards in Deck!
+                playSuccessSound();
+                triggerConfetti();
+                openModal();
+            }
+        }
+
+        function prevCard() {
+            if (filteredWords.length === 0) return;
+            if (currentIndex > 0) {
+                currentIndex--;
+                resetCardFaceDown();
+                renderCard();
+                updateProgress();
+                resetTimer();
+                playChimeSound();
+            }
+        }
+
+        function shuffleDeck() {
+            if (filteredWords.length <= 1) return;
+            for (let i = filteredWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
+            }
+            currentIndex = 0;
+            resetCardFaceDown();
+            renderCard();
+            updateProgress();
+            resetTimer();
+            showToast("បានច្របល់កាតដោយជោគជ័យ! 🔀");
+            playTone(600, 'triangle', 0.2, 0.1);
+        }
+
+        function restartDeck() {
+            currentIndex = 0;
+            learnedCardsSet.clear();
+            resetCardFaceDown();
+            renderCard();
+            updateProgress();
+            resetTimer();
+            showToast("បានចាប់ផ្តើមសារជាថ្មី! 🔄");
+        }
+
+        function updateProgress() {
+            const total = filteredWords.length;
+            const currentNumber = total === 0 ? 0 : currentIndex + 1;
+            const percent = total === 0 ? 0 : Math.round((currentNumber / total) * 100);
+
+            progressBar.style.width = `${percent}%`;
+            progressPercent.textContent = `${toKhmerNum(percent)}%`;
+            progressCountText.textContent = `កាតទី ${toKhmerNum(currentNumber)} នៃ ${toKhmerNum(total)}`;
+            learnedCountText.textContent = `បានរៀន៖ ${toKhmerNum(learnedCardsSet.size)}`;
+        }
+
+        /* Timer System */
+        function setTimerSec(sec) {
+            timerSeconds = sec;
+            document.querySelectorAll('.timer-btn').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-sec')) === sec) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            if (sec === 0) {
+                timerStatusLabel.textContent = "បិទ";
+                timerDisplay.textContent = "--:--";
+                clearInterval(timerInterval);
+                timerInterval = null;
+            } else {
+                timerStatusLabel.textContent = `${toKhmerNum(sec)} វិនាទី`;
+                resetTimer();
+            }
+        }
+
+        function resetTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (timerSeconds <= 0) return;
+
+            remainingTimer = timerSeconds;
+            renderTimerText(remainingTimer);
+
+            timerInterval = setInterval(() => {
+                remainingTimer--;
+                renderTimerText(remainingTimer);
+                if (remainingTimer <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    if (!isCardFlipped) {
+                        toggleCardFlip();
+                        setTimeout(() => {
+                            if (timerSeconds > 0) nextCard();
+                        }, 2500);
+                    } else {
+                        nextCard();
+                    }
+                }
+            }, 1000);
+        }
+
+        function renderTimerText(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        /* Sidebar Toggle */
+        function toggleSidebar() {
+            dashboardSidebar.classList.toggle('collapsed');
+            const isCollapsed = dashboardSidebar.classList.contains('collapsed');
+            sidebarToggleText.textContent = isCollapsed ? "បង្ហាញបញ្ជា" : "លាក់បញ្ជា";
+        }
+
+        /* Modal & Celebrations */
+        function openModal() {
+            completionModal.classList.add('active');
+        }
+
+        function closeModal() {
+            completionModal.classList.remove('active');
+        }
+
+        function goToNextDay() {
+            closeModal();
+            let nxt = currentDay + 1;
+            if (nxt > 216) nxt = 1;
+
+            // Find matching week
+            const wObj = ACADEMIC_WEEKS_DATA.find(w => w.days.includes(nxt));
+            if (wObj) {
+                weekSelect.value = wObj.week;
+                currentWeek = wObj.week;
+                updateDayDropdown(wObj.week);
+            }
+            daySelect.value = nxt;
+            loadDay(nxt);
+        }
+
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toastMsg.classList.add('show');
+            setTimeout(() => {
+                toastMsg.classList.remove('show');
+            }, 2500);
+        }
+
+        /* Keyboard Shortcuts */
+        function setupKeyboardShortcuts() {
+            window.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    toggleCardFlip();
+                } else if (e.code === 'ArrowRight') {
+                    e.preventDefault();
+                    nextCard();
+                } else if (e.code === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevCard();
+                } else if (e.key === 's' || e.key === 'S') {
+                    shuffleDeck();
+                } else if (e.key === 'r' || e.key === 'R') {
+                    restartDeck();
+                } else if (e.key === 'p' || e.key === 'P' || e.key === 'a' || e.key === 'A') {
+                    playCurrentWordAudio();
+                } else if (e.key === 'f' || e.key === 'F') {
+                    toggleFullScreen();
+                }
+            });
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                }
+            }
+        }
+
+        function toKhmerNum(num) {
+            const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+            return num.toString().split('').map(char => {
+                const digit = parseInt(char);
+                return isNaN(digit) ? char : khmerDigits[digit];
+            }).join('');
+        }
+
+        /* =====================================================================
+           6. VISUAL EFFECTS (Particle Canvas & Confetti)
+           ===================================================================== */
+        const pCanvas = document.getElementById('particleCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * pCanvas.width;
+                this.y = Math.random() * pCanvas.height;
+                this.size = Math.random() * 2.5 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = (Math.random() - 0.5) * 0.4;
+                this.color = Math.random() > 0.5 ? 'rgba(99, 102, 241, 0.4)' : 'rgba(245, 158, 11, 0.3)';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > pCanvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > pCanvas.height) this.speedY *= -1;
+            }
+            draw() {
+                pCtx.fillStyle = this.color;
+                pCtx.beginPath();
+                pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                pCtx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle());
+            }
+            animateParticles();
+        }
+
+        function animateParticles() {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        /* Confetti Burst */
+        const cCanvas = document.getElementById('confettiCanvas');
+        const cCtx = cCanvas.getContext('2d');
+        let confettiPieces = [];
+
+        function triggerConfetti() {
+            cCanvas.width = window.innerWidth;
+            cCanvas.height = window.innerHeight;
+            confettiPieces = [];
+            const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#ef4444'];
+            for (let i = 0; i < 120; i++) {
+                confettiPieces.push({
+                    x: cCanvas.width / 2,
+                    y: cCanvas.height / 2,
+                    w: Math.random() * 10 + 6,
+                    h: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vx: (Math.random() - 0.5) * 18,
+                    vy: (Math.random() - 0.5) * 18 - 4,
+                    gravity: 0.35,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 12,
+                    opacity: 1
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+            let activeCount = 0;
+            confettiPieces.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.rotation += p.rotSpeed;
+                p.opacity -= 0.007;
+
+                if (p.opacity > 0) {
+                    activeCount++;
+                    cCtx.save();
+                    cCtx.translate(p.x, p.y);
+                    cCtx.rotate((p.rotation * Math.PI) / 180);
+                    cCtx.globalAlpha = p.opacity;
+                    cCtx.fillStyle = p.color;
+                    cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    cCtx.restore();
+                }
+            });
+
+            if (activeCount > 0) {
+                requestAnimationFrame(animateConfetti);
+            } else {
+                cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+            }
+        }
+
+        // Run when page loads
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
